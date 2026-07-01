@@ -1,0 +1,1136 @@
+<!doctype html><html><head><script>(()=>{function F(b){if(window===top)return;if(b.type==="auxclick"&&b.button!==1)return;const j=b.composedPath?b.composedPath():[b.target];let m=null;for(let y=0;y<j.length;y++){const x=j[y];if(x&&x.matches&&x.matches("a[href],area[href]")){m=x;break}}if(!m&&b.target&&b.target.closest){m=b.target.closest("a[href],area[href]")}if(!m)return;const B=m.getAttribute("href");if(!B)return;let q,C;try{q=new URL(B,document.baseURI);C=new URL(document.baseURI).origin}catch{return}if((q.protocol==="http:"||q.protocol==="https:")&&q.origin!==C){b.preventDefault();parent.postMessage({__frame_nav:true,url:q.href},"*")}}addEventListener("click",F,true);addEventListener("auxclick",F,true);var D={};function z(b){if(window===top)return;const j=Date.now();if(j-(D[b]||0)<500)return;D[b]=j;parent.postMessage({__frame_engaged:true,kind:b},"*")}addEventListener("scroll",()=>z("scroll"),{capture:true,passive:true});addEventListener("pointermove",()=>z("pointer"),{capture:true,passive:true});addEventListener("click",()=>z("click"),{capture:true,passive:true});})();</script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+
+<title>Interview War Room — 2-Day Prep</title>
+<style>
+:root {
+  --ground: #0D1B2A;
+  --surface: #152131;
+  --surface-2: #1C2E42;
+  --border: #243A52;
+  --text: #E8EDF2;
+  --muted: #7A93AE;
+  --accent: #F0A500;
+  --accent-dim: rgba(240,165,0,0.10);
+  --accent-border: rgba(240,165,0,0.25);
+  --teal: #4ECDC4;
+  --teal-dim: rgba(78,205,196,0.09);
+  --teal-border: rgba(78,205,196,0.22);
+  --red: #E05252;
+  --font-head: Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ground); color: var(--text); font-family: var(--font-body); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+/* STICKY BAR */
+.statusbar { position: sticky; top: 0; z-index: 100; background: var(--surface-2); border-bottom: 1px solid var(--border); padding: 0 32px; height: 36px; display: flex; align-items: center; gap: 16px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.sb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+.sb-label { color: var(--text); }
+.sb-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; max-width: 300px; }
+.sb-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--teal)); border-radius: 2px; width: 0%; transition: width 0.35s ease; }
+.sb-pct { color: var(--accent); min-width: 38px; text-align: right; }
+
+/* HEADER */
+.page-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 32px 32px 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+.page-h1 { font-family: var(--font-head); font-size: 30px; font-weight: normal; color: var(--text); line-height: 1.15; }
+.page-h1 em { font-style: normal; color: var(--accent); }
+.header-meta { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.countdown-block { display: flex; gap: 12px; flex-shrink: 0; }
+.countdown-unit { background: var(--surface-2); border: 1px solid var(--border); border-radius: 5px; padding: 12px 18px; text-align: center; }
+.countdown-num { font-family: var(--font-head); font-size: 26px; color: var(--accent); line-height: 1; display: block; }
+.countdown-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-top: 4px; }
+
+/* MAIN */
+.main { padding: 28px 32px 48px; max-width: 1420px; margin: 0 auto; }
+.days-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 920px) { .days-grid { grid-template-columns: 1fr; } .main { padding: 20px 16px 40px; } .page-header { padding: 24px 16px; } .statusbar { padding: 0 16px; } }
+
+/* DAY COLUMN */
+.day-col { display: flex; flex-direction: column; gap: 14px; }
+.day-banner { display: flex; align-items: center; gap: 12px; padding: 13px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+.day-pill { font-family: var(--font-mono); font-size: 10px; font-weight: bold; background: var(--accent); color: var(--ground); padding: 3px 9px; border-radius: 3px; letter-spacing: 0.05em; flex-shrink: 0; }
+.day-pill.day2 { background: var(--teal); }
+.day-name { font-family: var(--font-head); font-size: 16px; font-weight: normal; color: var(--text); }
+.day-focus { margin-left: auto; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+/* TOPIC */
+.topic { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.topic.hot { border-left: 3px solid var(--accent); }
+.topic.warm { border-left: 3px solid var(--teal); }
+.topic-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+
+@keyframes alert-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(240,165,0,0.5); }
+  65%  { box-shadow: 0 0 0 5px rgba(240,165,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(240,165,0,0); }
+}
+.firing-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: alert-pulse 2.2s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .firing-dot { animation: none; } }
+.teal-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+
+.topic-time { font-family: var(--font-mono); font-size: 10px; color: var(--muted); min-width: 72px; }
+.topic-title { font-family: var(--font-head); font-size: 15px; font-weight: normal; flex: 1; color: var(--text); }
+.tag { font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; border-radius: 2px; letter-spacing: 0.04em; flex-shrink: 0; }
+.tag-amber { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+.tag-teal  { background: var(--teal-dim);   color: var(--teal);   border: 1px solid var(--teal-border); }
+
+/* SAVINGS TABLE */
+.savings-table { margin: 14px 16px 4px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.st-row { display: grid; grid-template-columns: 1fr 80px 80px 90px; gap: 0; border-bottom: 1px solid var(--border); }
+.st-row:last-child { border-bottom: none; }
+.st-row.head { background: var(--surface-2); }
+.st-cell { padding: 7px 10px; font-size: 12px; color: var(--text); }
+.st-row.head .st-cell { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.st-cell.saving { color: var(--teal); font-family: var(--font-mono); font-size: 12px; font-weight: bold; }
+.st-cell.num { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.st-row.total-row { background: var(--accent-dim); }
+.st-row.total-row .st-cell { color: var(--accent); font-family: var(--font-mono); font-weight: bold; }
+
+/* CHECKLIST */
+.checklist { padding: 14px 16px 16px; }
+.cl-section { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; margin-top: 14px; }
+.cl-section:first-child { margin-top: 0; }
+.cl-section.teal-lbl { color: var(--teal); }
+.cl-item { display: flex; align-items: flex-start; gap: 9px; padding: 4px 0; cursor: pointer; }
+.cl-item input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 13px; height: 13px; min-width: 13px; border: 1px solid var(--border); border-radius: 2px; background: var(--ground); cursor: pointer; margin-top: 3px; position: relative; transition: background 0.15s, border-color 0.15s; flex-shrink: 0; }
+.cl-item input[type="checkbox"]:checked { background: var(--teal); border-color: var(--teal); }
+.cl-item input[type="checkbox"]:checked::after { content: ''; position: absolute; left: 3px; top: 1px; width: 5px; height: 3px; border-left: 1.5px solid var(--ground); border-bottom: 1.5px solid var(--ground); transform: rotate(-45deg); }
+.cl-item label { font-size: 13px; color: var(--text); cursor: pointer; line-height: 1.5; }
+.cl-item.done label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+
+/* CODE INLINE */
+.ci { font-family: var(--font-mono); font-size: 11px; background: var(--surface-2); border: 1px solid var(--border); padding: 1px 5px; border-radius: 2px; color: #A8C7E8; }
+
+/* Q&A */
+.cl-sub { margin: 2px 0 6px 22px; padding-left: 10px; border-left: 2px solid var(--border); }
+.cl-sub-q { font-size: 11px; color: var(--muted); font-style: italic; line-height: 1.45; }
+.cl-sub-a { font-size: 12px; color: #8BAEC8; margin-top: 2px; line-height: 1.5; }
+
+/* STAR CARD */
+.star-card { margin: 4px 16px 14px; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 5px; padding: 12px 14px; }
+.star-card.teal-card { background: var(--teal-dim); border-color: var(--teal-border); }
+.star-eyebrow { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+.teal-card .star-eyebrow { color: var(--teal); }
+.star-row { display: grid; grid-template-columns: 60px 1fr; gap: 4px 10px; margin-bottom: 5px; align-items: start; }
+.star-key { font-family: var(--font-mono); font-size: 10px; color: var(--accent); font-weight: bold; padding-top: 2px; }
+.teal-card .star-key { color: var(--teal); }
+.star-val { font-size: 12px; color: var(--text); line-height: 1.55; }
+
+/* DIVIDER */
+.topic-divider { height: 1px; background: var(--border); margin: 0 16px; }
+
+/* SECTION TITLE */
+.section-title { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; margin-top: 28px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+/* CHEAT GRID */
+.cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
+.cheat-cell { background: var(--surface); padding: 12px 15px; }
+.cheat-tool { font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-bottom: 4px; font-weight: bold; }
+.cheat-def { font-size: 12px; color: #8BAEC8; line-height: 1.5; }
+
+/* ADDITIONAL IDEAS */
+.ideas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.idea-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+.idea-name { font-family: var(--font-mono); font-size: 11px; color: var(--teal); margin-bottom: 5px; font-weight: bold; }
+.idea-how { font-size: 12px; color: var(--text); line-height: 1.5; margin-bottom: 4px; }
+.idea-impact { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+</style>
+
+<div class="statusbar">
+  <div class="sb-dot"></div>
+  <span class="sb-label">READINESS</span>
+  <div class="sb-track"><div class="sb-fill" id="sbFill"></div></div>
+  <span class="sb-pct" id="sbPct">0%</span>
+  <span id="sbCount">0 / 0 topics covered</span>
+</div>
+
+<header class="page-header">
+  <div>
+    <div class="eyebrow">devops interview · june 2026</div>
+    <h1 class="page-h1">2-Day <em>War Room</em></h1>
+    <p class="header-meta">Check each topic as you cover it — readiness gauge updates live.</p>
+  </div>
+  <div class="countdown-block">
+    <div class="countdown-unit"><span class="countdown-num">2</span><span class="countdown-lbl">Days</span></div>
+    <div class="countdown-unit"><span class="countdown-num">9</span><span class="countdown-lbl">Topics</span></div>
+    <div class="countdown-unit"><span class="countdown-num">3</span><span class="countdown-lbl">Stories</span></div>
+  </div>
+</header>
+
+<main class="main">
+<div class="days-grid">
+
+<!-- ═══════════════════ DAY 1 ═══════════════════ -->
+<div class="day-col">
+
+  <div class="day-banner">
+    <span class="day-pill">DAY 1</span>
+    <span class="day-name">Tuesday — Depth &amp; Big Stories</span>
+    <span class="day-focus">STORY-DRIVEN</span>
+  </div>
+
+  <!-- COST OPTIMIZATION -->
+  <div class="topic hot">
+    <div class="topic-head">
+      <div class="firing-dot"></div>
+      <span class="topic-time">9 – 11 am</span>
+      <span class="topic-title">AWS Cost Optimization</span>
+      <span class="tag tag-amber">LEAD STORY</span>
+    </div>
+
+    <!-- Savings breakdown table -->
+    <div class="savings-table">
+      <div class="st-row head">
+        <div class="st-cell">Initiative</div>
+        <div class="st-cell num">Before</div>
+        <div class="st-cell num">After</div>
+        <div class="st-cell saving">Saved/mo</div>
+      </div>
+      <div class="st-row">
+        <div class="st-cell">Inspector optimization</div>
+        <div class="st-cell num">$597</div>
+        <div class="st-cell num">~$60</div>
+        <div class="st-cell saving">~$537</div>
+      </div>
+      <div class="st-row">
+        <div class="st-cell">GuardDuty disabled</div>
+        <div class="st-cell num">$394</div>
+        <div class="st-cell num">$0</div>
+        <div class="st-cell saving">$394</div>
+      </div>
+      <div class="st-row">
+        <div class="st-cell">CloudWatch IA class</div>
+        <div class="st-cell num">~$180</div>
+        <div class="st-cell num">~$40</div>
+        <div class="st-cell saving">~$142</div>
+      </div>
+      <div class="st-row">
+        <div class="st-cell">EKS 3→1 cluster consolidation</div>
+        <div class="st-cell num">3 clusters</div>
+        <div class="st-cell num">1 cluster</div>
+        <div class="st-cell saving">$146+ (CP)</div>
+      </div>
+      <div class="st-row">
+        <div class="st-cell">Karpenter + rightsizing + idle cleanup</div>
+        <div class="st-cell num">—</div>
+        <div class="st-cell num">—</div>
+        <div class="st-cell saving">~$6K+</div>
+      </div>
+      <div class="st-row total-row">
+        <div class="st-cell">TOTAL</div>
+        <div class="st-cell num">~$16K</div>
+        <div class="st-cell num">~$8K</div>
+        <div class="st-cell saving">~$8K (50%)</div>
+      </div>
+    </div>
+
+    <div class="checklist">
+
+      <div class="cl-section">Initiative 1 — Inspector (~$537/month saved)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Root cause: wildcard <span class="ci">*</span> rule across all 38 ECR repos with <span class="ci">CONTINUOUS_SCAN</span>. Dev/stage repos rebuild on every commit → constant re-scan charges ($207/month in re-scans alone).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Fix: restricted Enhanced scanning to <span class="ci">*-prod</span> repos only (10 of 38), changed to <span class="ci">SCAN_ON_PUSH</span>. 28 dev/stage repos → Basic scanning (free).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>CLI used: <span class="ci">aws ecr put-registry-scanning-configuration --scan-type ENHANCED --rules '[{"repositoryFilters":[{"filter":"*-prod","filterType":"WILDCARD"}],"scanFrequency":"SCAN_ON_PUSH"}]'</span></label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Also disabled: EC2 agentless scanning (redundant with agent-based SSM) and Lambda scanning — combined ~$30/month. Network assessments cannot be disabled independently.</label>
+      </label>
+
+      <div class="cl-section">Initiative 2 — GuardDuty ($394/month saved)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Root cause: EKS audit log analysis alone = $205/month (52% of the bill). Scale of usage didn't justify cost.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Decision: no active SOC2 / ISO27001 compliance requirement at Blinq.IO at this stage → GuardDuty is optional. This was a risk-aware decision, not just cost-cutting.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Replacement: 6 free CloudWatch metric alarms covering highest-value detections — RootAccountUsage, UnauthorizedAPICalls, ConsoleLoginWithoutMFA, IAMPolicyChanges, CloudTrailChanges, SecurityGroupChanges. Alerts via SNS to alerts@blinq.io.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>CLI: <span class="ci">aws guardduty delete-detector --region eu-north-1 --detector-id &lt;id&gt;</span> across all active regions (eu-north-1 + us-east-2).</label>
+      </label>
+
+      <div class="cl-section">Initiative 3 — CloudWatch IA Conversion (~$142/month)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>8 EKS cluster log groups in eu-north-1. Pre-checks before conversion: no subscription filters, no metric filters, no live tail usage on any group — confirmed safe to downgrade.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>blinqV2-prod-cluster: exported to S3 first (s3://blinqio-backups/cloudwatch-eks-logs/blinqV2-prod-cluster/), then recreated as IA with 90-day retention. Logs are gzip-queryable via Athena.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>2 log groups in us-east-2 deleted entirely as part of region decommission.</label>
+      </label>
+
+      <div class="cl-section">Initiative 4 — EKS Consolidation (3 → 1 cluster)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Before: separate prod, dev, and stage EKS clusters. After: one shared cluster with dev and stage moved to namespaces with ResourceQuota + NetworkPolicy isolation.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Direct control plane savings: 2 × ($0.10/hr × 730h) = $146/month. Larger savings from eliminating duplicate node groups across 3 clusters (several thousand/month in node costs).</label>
+      </label>
+
+      <div class="cl-section">Initiative 5 — Karpenter + Node Architecture</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Segregated node groups: system nodegroup (On-Demand, for kube-system, Karpenter, ArgoCD) vs application nodegroup (Spot-preferred, for stateless workloads).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Karpenter bin-packing + consolidation policy: automatically terminates underutilised nodes after workloads drain, reducing idle node cost vs static Auto Scaling Groups.</label>
+      </label>
+
+      <div class="cl-section">Initiative 6 — Rightsizing + Idle Cleanup</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Rightsized EC2 nodes and Kafka brokers using CloudWatch CPU/memory utilisation metrics. Identified consistently &lt;20% utilisation → downsized instance type.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Terminated idle instances and decommissioned unused services. Used Cost Explorer usage-type breakdown to surface zero-activity resources.</label>
+      </label>
+
+      <div class="cl-section teal-lbl">Anticipate These Questions</div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"How did you know what was safe to cut?"</div>
+        <div class="cl-sub-a">Cost Explorer by usage type to diagnose root cause per service. For Inspector: validated dev repos don't need Enhanced scanning — Basic is free and sufficient for dev. For GuardDuty: confirmed no compliance mandate before disabling. For CloudWatch IA: audited all log groups for subscription/metric filters first.</div>
+      </div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"Wasn't disabling GuardDuty a security risk?"</div>
+        <div class="cl-sub-a">Yes, it was a risk-informed decision. GuardDuty does ML-based anomaly detection that CloudWatch alarms can't replicate. But we replaced it with the highest-value detections (root usage, IAM changes, MFA bypass) as free CloudWatch alarms. For a startup without a compliance mandate, that trade-off was acceptable. I'd revisit when SOC2 prep begins.</div>
+      </div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"How did you measure the actual savings?"</div>
+        <div class="cl-sub-a">Cost Explorer before/after per service and usage type. Tracked week-over-week during rollout to confirm the expected drop. For Inspector specifically, usage-type breakdown showed re-scan charges disappearing after switching to SCAN_ON_PUSH.</div>
+      </div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"What would you do next if you had another month?"</div>
+        <div class="cl-sub-a">S3 lifecycle policies (move logs to IA/Glacier), VPC endpoints for S3 and DynamoDB to eliminate NAT Gateway charges for those services, Compute Savings Plans for baseline EC2 spend, ECR image lifecycle policies to auto-delete untagged images older than 30 days.</div>
+      </div>
+
+    </div>
+
+    <div class="star-card">
+      <div class="star-eyebrow">STAR Story — Cost Reduction</div>
+      <div class="star-row">
+        <span class="star-key">SITUATION</span>
+        <span class="star-val">Joined Blinq.IO with AWS spend at ~$16K/month and no cost governance. No tagging policy, no spending visibility, no one owning cloud costs.</span>
+      </div>
+      <div class="star-row">
+        <span class="star-key">TASK</span>
+        <span class="star-val">Reduce cloud spend without impacting production reliability or developer velocity.</span>
+      </div>
+      <div class="star-row">
+        <span class="star-key">ACTION</span>
+        <span class="star-val">Used Cost Explorer usage-type breakdown to diagnose per-service root causes. Optimised Inspector scanning (wildcard rule → prod-only, SCAN_ON_PUSH), disabled GuardDuty and replaced with 6 CloudWatch security alarms, converted 8 EKS log groups to Infrequent Access after auditing for filter dependencies, consolidated 3 EKS clusters into 1 with namespace isolation, implemented Karpenter for right-sized autoscaling, and rightsized EC2 nodes and Kafka brokers based on utilisation data.</span>
+      </div>
+      <div class="star-row">
+        <span class="star-key">RESULT</span>
+        <span class="star-val">$16K → $8K/month (50% reduction). Production uptime maintained throughout. Security posture maintained by replacing GuardDuty with targeted CloudWatch alarms.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KUBERNETES -->
+  <div class="topic hot">
+    <div class="topic-head">
+      <div class="firing-dot"></div>
+      <span class="topic-time">11 am – 1 pm</span>
+      <span class="topic-title">Kubernetes &amp; EKS</span>
+      <span class="tag tag-amber">DEEP DIVE</span>
+    </div>
+    <div class="checklist">
+      <div class="cl-section">Karpenter (You Implemented This)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Karpenter vs Cluster Autoscaler: Karpenter provisions nodes directly (no node groups required), faster scaling, bin-packing aware, flexible instance family selection. CA works with ASGs, can't pick instance type on the fly.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>NodePool: defines constraints (instance families, zones, capacity type Spot/On-Demand, resource limits). EC2NodeClass: AWS-specific config (AMI, subnet, security group, IAM role). NodeClaim: the actual provisioned node.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Your architecture: system nodegroup (On-Demand, kube-system + control-plane workloads) vs application nodegroup (Spot-preferred, stateless services). Prevents Spot interruption from taking down critical infrastructure.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Consolidation policy: Karpenter evaluates whether workloads can be bin-packed onto fewer nodes → terminates underutilised nodes. Disruption budget controls aggressiveness.</label>
+      </label>
+      <div class="cl-section">Namespace Isolation (You Designed This)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>ResourceQuota: caps CPU/memory/pods per namespace — prevents dev workload from starving prod or stage.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>LimitRange: sets default requests/limits on pods that omit them. Pairs with ResourceQuota to prevent resource exhaustion from unspecified pods.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>NetworkPolicy: default deny-all → explicit allow per namespace. Prevents dev from hitting stage databases, etc.</label>
+      </label>
+      <div class="cl-section">Deployment &amp; Reliability</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Rolling update: maxSurge + maxUnavailable. Readiness probe gates traffic — new pod must pass probe before old pod is removed. This is how you got zero-downtime deployments at C&amp;R.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>PodDisruptionBudget: minimum available pods during Karpenter consolidation, node drain, or voluntary disruptions.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>IRSA: pods assume IAM roles via projected service account tokens. Annotate SA with role ARN. No static keys on nodes. This is how EKS workloads access S3, Secrets Manager, etc.</label>
+      </label>
+      <div class="cl-section teal-lbl">Likely Questions</div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"How did you ensure dev workloads didn't affect staging after consolidation?"</div>
+        <div class="cl-sub-a">ResourceQuotas + LimitRanges per namespace cap resource usage. NetworkPolicies restrict pod-to-pod traffic across namespaces. Separate RBAC service accounts per environment. Node affinity if needed to pin workloads.</div>
+      </div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"Walk me through how a new node gets provisioned by Karpenter."</div>
+        <div class="cl-sub-a">Pending pod → kube-scheduler can't place it → Karpenter watches for unschedulable events → evaluates NodePools → picks cheapest/best-fit instance type → calls EC2 RunInstances → node joins cluster → pod scheduled.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GITOPS -->
+  <div class="topic warm">
+    <div class="topic-head">
+      <div class="teal-dot"></div>
+      <span class="topic-time">2 – 4 pm</span>
+      <span class="topic-title">GitOps — ArgoCD &amp; Kargo</span>
+      <span class="tag tag-teal">IMPLEMENTATION</span>
+    </div>
+    <div class="checklist">
+      <div class="cl-section">ArgoCD</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Core concept: ArgoCD continuously reconciles desired state (Git) with live state (cluster). Pull-based — no credentials pushed outside the cluster.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Sync status: Synced (matches Git), OutOfSync (drift detected), Progressing (applying), Degraded (health check failing).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>App of Apps: one root Application manages child Applications — used for bootstrapping entire environments from a single repo path.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Sync waves + hooks: PreSync hook (e.g. DB migration) runs before main resources, PostSync hook for smoke tests. Wave number controls ordering within apply.</label>
+      </label>
+      <div class="cl-section">Kargo (Progressive Delivery)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Problem Kargo solves: ArgoCD deploys a Git state. Kargo orchestrates the promotion pipeline — which version is in which stage, enforcing gates, automating dev → staging → prod flow.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Warehouse watches artifact source (container registry, Git, Helm). Freight = immutable snapshot of artifact versions. Stage = environment. Promotion = advance Freight into a Stage.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Verification step: after Freight lands in a Stage, Kargo can run analysis (Argo Rollouts or custom) before auto-promoting to the next Stage.</label>
+      </label>
+      <div class="cl-section teal-lbl">Likely Questions</div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"Why GitOps over push-based CD?"</div>
+        <div class="cl-sub-a">Git is the audit trail (who changed what, when, via which PR). Drift is auto-corrected. Cluster credentials never leave the cluster. Manual kubectl changes are overwritten on next sync — nothing can drift silently.</div>
+      </div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"What did Kargo add that ArgoCD alone couldn't do?"</div>
+        <div class="cl-sub-a">ArgoCD syncs a declared state. It doesn't know about "promote version X from dev to stage after tests pass." Kargo adds the promotion pipeline layer — tracks artifact versions per stage, runs verification gates, automates the flow while giving visibility into what's where.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVABILITY -->
+  <div class="topic warm">
+    <div class="topic-head">
+      <div class="teal-dot"></div>
+      <span class="topic-time">4 – 6 pm</span>
+      <span class="topic-title">Observability Stack</span>
+      <span class="tag tag-teal">PROMETHEUS · GRAFANA</span>
+    </div>
+    <div class="checklist">
+      <div class="cl-section">Prometheus</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Metric types: Counter (only up, e.g. request count), Gauge (up/down, e.g. CPU %), Histogram (bucketed latency), Summary (client-side quantiles).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Key PromQL: <span class="ci">rate(http_requests_total[5m])</span> → per-second rate. <span class="ci">histogram_quantile(0.99, rate(...))</span> → p99 latency. <span class="ci">avg by(pod)(container_memory_usage_bytes)</span> → memory per pod.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>ServiceMonitor / PodMonitor: CRDs that tell Prometheus Operator which services to scrape (label selector + scrape interval + path + port).</label>
+      </label>
+      <div class="cl-section">Alertmanager &amp; Grafana</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Alertmanager routing: route tree matches labels → receiver. Inhibition: suppress child alerts when parent is firing (e.g. suppress pod alerts if the whole node is down). Silences for maintenance.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Slack integration: webhook receiver in Alertmanager config. Go template the message body — include severity, affected pod/service, runbook link.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Alert design: alert on symptoms (error rate up, latency p99 &gt;threshold) not causes (CPU 70%). Cause-based alerts are noisy and don't directly mean user impact.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Grafana: describe your dashboards specifically — what panels (time series, stat, table), what queries, what time ranges, what thresholds. Have 2-3 specific examples ready.</label>
+      </label>
+    </div>
+  </div>
+
+</div>
+<!-- end day 1 -->
+
+<!-- ═══════════════════ DAY 2 ═══════════════════ -->
+<div class="day-col">
+
+  <div class="day-banner">
+    <span class="day-pill day2">DAY 2</span>
+    <span class="day-name">Wednesday — Breadth &amp; Behavioral</span>
+    <span class="day-focus">TOOLS + STAR</span>
+  </div>
+
+  <!-- TERRAFORM -->
+  <div class="topic hot">
+    <div class="topic-head">
+      <div class="firing-dot"></div>
+      <span class="topic-time">9 – 11 am</span>
+      <span class="topic-title">Terraform &amp; IaC</span>
+      <span class="tag tag-amber">CORE SKILL</span>
+    </div>
+    <div class="checklist">
+      <div class="cl-section">Module Architecture</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Module structure: variables.tf (inputs), outputs.tf, main.tf, versions.tf. Versioned via Git tags. Root module calls reusable modules — avoids copy-paste across environments.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>State: S3 backend + DynamoDB lock table. Never commit .tfstate. Workspace per environment vs separate state files — workspaces share a backend, separate states give stronger isolation.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Plan/Apply in CI: <span class="ci">terraform plan -out=plan.tfplan</span> on PR (post output as comment), <span class="ci">terraform apply plan.tfplan</span> on merge. The saved plan file ensures apply runs exactly what was reviewed.</label>
+      </label>
+      <div class="cl-section">Common Patterns</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label><span class="ci">for_each</span> over <span class="ci">count</span>: keyed by string → adding/removing items doesn't shift indices and destroy unrelated resources.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Dynamic blocks: generate repeated nested blocks (e.g. multiple ingress rules) from a list variable — avoids hardcoded repetition.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Secrets: never hardcode. Reference AWS Secrets Manager via <span class="ci">data "aws_secretsmanager_secret_version"</span> or inject via CI env vars. Mark outputs as <span class="ci">sensitive = true</span>.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Drift: scheduled <span class="ci">terraform plan</span> in CI to detect out-of-band changes. <span class="ci">terraform import</span> to bring existing resources under management without recreating them.</label>
+      </label>
+      <div class="cl-section teal-lbl">Likely Questions</div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"Someone manually changed a resource — what happens?"</div>
+        <div class="cl-sub-a">Next terraform plan shows drift as a pending change. Either apply to overwrite (Terraform wins), or investigate why and update the code to match intent. Ideally prevent with SCPs so only Terraform can make changes.</div>
+      </div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"How do you handle breaking changes in a module?"</div>
+        <div class="cl-sub-a">Semantic versioning on modules. Use moved blocks (Terraform 1.1+) to rename resources without destroy/recreate. Test in non-prod first. Pin module version in calling code and upgrade deliberately.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CI/CD -->
+  <div class="topic hot">
+    <div class="topic-head">
+      <div class="firing-dot"></div>
+      <span class="topic-time">11 am – 1 pm</span>
+      <span class="topic-title">CI/CD — GitHub Actions &amp; Jenkins</span>
+      <span class="tag tag-amber">BUILT THIS</span>
+    </div>
+    <div class="checklist">
+      <div class="cl-section">GitHub Actions (Blinq.IO)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Trigger types: <span class="ci">push</span>, <span class="ci">pull_request</span>, <span class="ci">schedule</span>, <span class="ci">workflow_dispatch</span> (manual + inputs), <span class="ci">workflow_call</span> (reusable workflows).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Jobs run in parallel by default. Use <span class="ci">needs:</span> to sequence. <span class="ci">matrix:</span> fans out across multiple values (e.g. deploy to dev, stage, prod in one workflow).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>OIDC auth to AWS: no long-lived keys stored in GitHub. GitHub exchanges JWT for temporary credentials via IAM trust policy. Configure <span class="ci">aws-actions/configure-aws-credentials</span> with <span class="ci">role-to-assume</span>.</label>
+      </label>
+      <div class="cl-section">Jenkins (C&amp;R Software)</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Declarative pipeline: <span class="ci">pipeline → agent → stages → stage → steps</span>. <span class="ci">post</span> block handles always/success/failure. Cleaner syntax than scripted.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Groovy scripted pipelines: full Groovy for complex logic (loops, try/catch, dynamic stage generation). More flexible, harder to read — used when declarative can't express the logic.</label>
+      </label>
+      <div class="cl-section">Deployment Strategies</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Rolling: incremental pod replacement. <span class="ci">maxUnavailable: 0</span> + readiness probes = zero downtime. Rollback: <span class="ci">kubectl rollout undo</span>.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Blue-green: two identical environments, switch load balancer target. Instant rollback. Higher cost (2× infra). Stateless apps only.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Canary: route small % to new version, monitor, expand or rollback. Argo Rollouts automates with analysis runs. Most granular control over risk.</label>
+      </label>
+      <div class="cl-section teal-lbl">Likely Questions</div>
+      <div class="cl-sub">
+        <div class="cl-sub-q">"How did you ensure zero-downtime deployments?"</div>
+        <div class="cl-sub-a">Readiness probes (traffic only sent to ready pods), maxUnavailable: 0 (no pod removed until replacement is ready), PodDisruptionBudget, terminationGracePeriodSeconds for in-flight request drain, preStop hook if needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AWS SERVICES -->
+  <div class="topic warm">
+    <div class="topic-head">
+      <div class="teal-dot"></div>
+      <span class="topic-time">2 – 3:30 pm</span>
+      <span class="topic-title">AWS Services Deep Dive</span>
+      <span class="tag tag-teal">SAA-C03 CERTIFIED</span>
+    </div>
+    <div class="checklist">
+      <div class="cl-section">Networking</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>VPC: public subnets (IGW route) for ALBs, private subnets (NAT route) for EKS workers. Security Groups (stateful, instance-level) vs NACLs (stateless, subnet-level).</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Route53 routing policies: Simple, Weighted (A/B traffic split), Latency-based (closest region), Failover (health-check gated), Geolocation.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>CloudFront: origins, behaviours (path-based routing), cache policy, OAC for private S3. ACM cert for CloudFront MUST be in us-east-1 regardless of origin region.</label>
+      </label>
+      <div class="cl-section">Compute &amp; Data</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>EKS: AWS-managed control plane (etcd + API server). Worker nodes = EC2 in your account. Managed node groups handle node lifecycle. IRSA for pod IAM permissions.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>RDS Multi-AZ = synchronous standby, automatic failover (HA). Read Replica = async copy for read scaling, manual promotion. These are different things — know the distinction.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Auto Scaling: target tracking (keep metric at target), step scaling (step changes at thresholds), scheduled (known traffic patterns). Cooldown prevents thrashing.</label>
+      </label>
+      <div class="cl-section">Security &amp; Access</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>IAM least privilege: policies attached to roles (never users). Condition keys for further restriction. IRSA for EKS pods — no EC2 instance profile needed.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Systems Manager: Parameter Store (config/non-secrets), Secrets Manager (secrets with rotation). Session Manager = SSH replacement, no bastion, full CloudTrail audit log.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Okta + K8s OIDC: configure API server with Okta as OIDC provider. Users get JWT from Okta, kubectl uses it. Map Okta groups → K8s ClusterRoleBindings via RBAC.</label>
+      </label>
+    </div>
+  </div>
+
+  <!-- INCIDENT + BEHAVIORAL -->
+  <div class="topic warm">
+    <div class="topic-head">
+      <div class="teal-dot"></div>
+      <span class="topic-time">3:30 – 5 pm</span>
+      <span class="topic-title">Incidents &amp; Behavioral</span>
+      <span class="tag tag-teal">STAR STORIES</span>
+    </div>
+    <div class="checklist">
+      <div class="cl-section">MongoDB Incident Story</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Know your MongoDB incident end-to-end: what broke, how you detected it, your diagnostic steps, the fix, and what you put in place to prevent recurrence.</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Backup validation: what you check (restore to non-prod, verify data integrity, confirm backup recency), how often, who owns it — not just "we have automated backups."</label>
+      </label>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>RCA format: 5-min timeline → contributing factors → root cause → action items (owner + due date). Practice writing this out in 5 minutes flat.</label>
+      </label>
+      <div class="cl-section">Your Opening Pitch</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>"Tell me about yourself" — 90 seconds: C&amp;R Software (Jenkins/K8s foundations, 2 years) → Blinq.IO (GitOps + full cost ownership, 50% AWS cost reduction). Lead with the number, explain the scope, land on what you're looking for next.</label>
+      </label>
+      <div class="cl-section">Questions to Ask Them</div>
+      <label class="cl-item">
+        <input type="checkbox" onchange="update(this)">
+        <label>Prepare 3: (1) current deployment workflow and biggest pain point, (2) current infrastructure challenge they're trying to solve, (3) how on-call and incident response is structured.</label>
+      </label>
+    </div>
+
+    <div class="star-card teal-card">
+      <div class="star-eyebrow">STAR Story — MongoDB Recovery</div>
+      <div class="star-row"><span class="star-key">SITUATION</span><span class="star-val">MongoDB [describe: crash / replication lag / disk full / corruption] impacted [which environment / which service].</span></div>
+      <div class="star-row"><span class="star-key">TASK</span><span class="star-val">Restore service with minimum data loss, identify root cause, prevent recurrence.</span></div>
+      <div class="star-row"><span class="star-key">ACTION</span><span class="star-val">Detected via [your alert or user report]. Diagnosed [specific steps]. Restored from backup, validated data integrity by [how]. Ran RCA. Implemented [specific preventive change — alerting threshold, backup validation schedule, resource limit].</span></div>
+      <div class="star-row"><span class="star-key">RESULT</span><span class="star-val">Service restored in [X] minutes/hours. [Quantify data loss if any.] [Preventive measure] has prevented recurrence since.</span></div>
+    </div>
+  </div>
+
+</div>
+<!-- end day 2 -->
+</div>
+<!-- end days grid -->
+
+
+<!-- ══ ADDITIONAL OPTIMIZATION IDEAS ══════════════ -->
+<div class="section-title">Additional Cost Ideas — Have These Ready If Asked "What Else?"</div>
+<div class="ideas-grid">
+  <div class="idea-card">
+    <div class="idea-name">Compute Savings Plans</div>
+    <div class="idea-how">1-year commitment on baseline EC2/Lambda/Fargate spend, automatically applied across instance types and regions. More flexible than RIs.</div>
+    <div class="idea-impact">Savings: 20–40% on committed baseline compute.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">VPC Endpoints (S3 + DynamoDB)</div>
+    <div class="idea-how">Gateway endpoints for S3 and DynamoDB are free. Traffic from EKS pods to S3 currently exits through NAT Gateway ($0.045/GB). Endpoint eliminates that cost.</div>
+    <div class="idea-impact">High impact if pods do heavy S3 reads/writes.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">ECR Image Lifecycle Policies</div>
+    <div class="idea-how">Auto-delete untagged images older than 30 days and old tagged versions. Reduces storage cost and eliminates Inspector re-scanning stale images (which was a root cause already found).</div>
+    <div class="idea-impact">Compounds the Inspector savings already made.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">S3 Lifecycle Policies</div>
+    <div class="idea-how">Move logs to IA after 30 days, Glacier after 90. Already did this for CloudWatch logs (exported to S3 + IA) — same principle applies to application logs, Terraform state backups, etc.</div>
+    <div class="idea-impact">Ongoing, grows as data accumulates.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">Detached EBS Volume Cleanup</div>
+    <div class="idea-how">Detached volumes from terminated instances keep billing at $0.08–0.10/GB/month. Use Trusted Advisor or Cost Explorer → EC2 Other to surface them. Snapshot if unsure, then delete.</div>
+    <div class="idea-impact">Common "hidden" cost. Easy win.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">Cross-AZ Traffic Reduction</div>
+    <div class="idea-how">AWS charges $0.01/GB for cross-AZ traffic. Pin pods to same AZ as their data stores using topology spread constraints. Use ALB with zonal shift or target group AZ routing.</div>
+    <div class="idea-impact">High impact on data-intensive workloads.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">AWS Cost Anomaly Detection</div>
+    <div class="idea-how">Free AWS service. Set a threshold (e.g. $100 unexpected increase in any service) → SNS alert. Catches runaway spend before it compounds. Takes 10 minutes to set up.</div>
+    <div class="idea-impact">Preventive — stops the next surprise bill.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">NAT Gateway Per-AZ Review</div>
+    <div class="idea-how">If running 3 NAT Gateways (one per AZ), check whether traffic actually flows across AZs enough to justify 3. Some workloads are fine with 1 NAT GW in one AZ for non-production.</div>
+    <div class="idea-impact">$32/month per NAT GW idle cost, plus data processing.</div>
+  </div>
+  <div class="idea-card">
+    <div class="idea-name">CloudWatch Custom Metrics Audit</div>
+    <div class="idea-how">Each custom metric costs $0.30/month. Audit what's being published — application code often pushes dozens of metrics that nobody reads. Cut unused ones.</div>
+    <div class="idea-impact">Can add up quickly at scale.</div>
+  </div>
+</div>
+
+<!-- ══ CLOUDWATCH DEEP DIVE ════════════════════════ -->
+<div class="section-title">CloudWatch — Full Service Study Guide</div>
+
+<div class="cw-grid">
+
+  <!-- LOGS ARCHITECTURE -->
+  <div class="cw-card">
+    <div class="cw-card-head">
+      <span class="cw-num">01</span>
+      <span class="cw-card-title">Logs — Architecture</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">Log Group</div>
+        <div class="cw-desc">Container for log streams from the same application or resource. You set retention policy and storage class here. Example: <span class="ci">/aws/eks/blinqV2-prod-cluster/cluster</span></div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Log Stream</div>
+        <div class="cw-desc">Sequence of events from a single source within a log group. For EKS, each node or pod gets its own stream. For Lambda, each function instance gets its own stream.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Log Event</div>
+        <div class="cw-desc">A single entry: timestamp + raw message string. CloudWatch indexes by timestamp only — not field-aware (that's what Log Insights adds on top).</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Retention Policy</div>
+        <div class="cw-desc">1 day → 10 years, or Never Expire (default). Log groups with no retention policy accumulate forever and bill forever. Set retention on every group you create.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORAGE CLASSES -->
+  <div class="cw-card cw-highlight">
+    <div class="cw-card-head">
+      <span class="cw-num cw-num-accent">02</span>
+      <span class="cw-card-title">Storage Classes — Standard vs IA</span>
+      <span class="tag tag-amber" style="margin-left:auto">YOU DID THIS</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-compare">
+        <div class="cw-compare-col">
+          <div class="cw-compare-head">Standard</div>
+          <div class="cw-compare-item">Full feature set</div>
+          <div class="cw-compare-item">Subscription filters ✓</div>
+          <div class="cw-compare-item">Metric filters ✓</div>
+          <div class="cw-compare-item">Live Tail ✓</div>
+          <div class="cw-compare-item">Log Insights ✓</div>
+          <div class="cw-compare-item cw-price">~$0.03/GB stored</div>
+        </div>
+        <div class="cw-compare-col cw-compare-ia">
+          <div class="cw-compare-head">Infrequent Access (IA)</div>
+          <div class="cw-compare-item">50% cheaper storage</div>
+          <div class="cw-compare-item cw-blocked">Subscription filters ✗</div>
+          <div class="cw-compare-item cw-blocked">Metric filters ✗</div>
+          <div class="cw-compare-item cw-blocked">Live Tail ✗</div>
+          <div class="cw-compare-item">Log Insights ✓</div>
+          <div class="cw-compare-item cw-price">~$0.0015/GB stored</div>
+        </div>
+      </div>
+      <div class="cw-note">Pre-conversion checklist (what you ran): audit all dashboards referencing the log group → check for subscription filters → check for metric filters → confirm no active Live Tail sessions. All clear = safe to convert.</div>
+      <div class="cw-note" style="margin-top:6px">For blinqV2-prod-cluster: exported all existing data to S3 before deleting and recreating as IA (conversion in-place is not supported — you must recreate the group).</div>
+    </div>
+  </div>
+
+  <!-- SUBSCRIPTION FILTERS -->
+  <div class="cw-card">
+    <div class="cw-card-head">
+      <span class="cw-num">03</span>
+      <span class="cw-card-title">Subscription Filters</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">What it does</div>
+        <div class="cw-desc">Streams matching log events in real-time (near-real-time) to a downstream destination. Pattern match is applied — only matching lines are forwarded.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Destinations</div>
+        <div class="cw-desc">Lambda (real-time processing), Kinesis Data Streams (buffer → consumer), Kinesis Firehose (S3 / Splunk / OpenSearch delivery), Amazon OpenSearch Service (direct).</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Limit</div>
+        <div class="cw-desc">Max 2 subscription filters per log group (Standard only). Cross-account subscriptions possible via resource policies.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Use cases</div>
+        <div class="cw-desc">SIEM ingestion, real-time error alerting via Lambda, log centralisation across accounts, shipping logs to Elasticsearch/OpenSearch for full-text search.</div>
+      </div>
+      <div class="cw-note">Why you checked this before IA conversion: if a subscription filter existed, converting to IA would silently break the stream — no error thrown, logs just stop flowing to the destination.</div>
+    </div>
+  </div>
+
+  <!-- METRIC FILTERS -->
+  <div class="cw-card">
+    <div class="cw-card-head">
+      <span class="cw-num">04</span>
+      <span class="cw-card-title">Metric Filters</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">What it does</div>
+        <div class="cw-desc">Scans incoming log events for a pattern → emits a CloudWatch Metric data point on each match. Bridges logs and metrics. Standard log groups only.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Filter pattern syntax</div>
+        <div class="cw-desc">Simple: <span class="ci">ERROR</span> matches any line containing "ERROR". JSON: <span class="ci">{ $.level = "error" }</span>. Space-delimited: <span class="ci">[ip, user, timestamp, method="POST", ...]</span>. Extract values: <span class="ci">{ $.latencyMs = * }</span> → use as metric value.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Common use</div>
+        <div class="cw-desc">Count ERROR lines per minute → metric → alarm. Extract HTTP status 5xx counts from access logs → metric → alarm. Extract latency from structured JSON logs → p99 alarm.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Limitation</div>
+        <div class="cw-desc">Only processes new log events from the moment the filter is created — does not backfill historical data. Max 2 metric filters per log group in some older accounts.</div>
+      </div>
+      <div class="cw-note">Why you checked this before IA conversion: if a metric filter existed, converting to IA would silently stop populating the metric — any alarm on it would go INSUFFICIENT_DATA and stop firing.</div>
+    </div>
+  </div>
+
+  <!-- LOG INSIGHTS -->
+  <div class="cw-card">
+    <div class="cw-card-head">
+      <span class="cw-num">05</span>
+      <span class="cw-card-title">CloudWatch Logs Insights</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">What it does</div>
+        <div class="cw-desc">Interactive query engine for log data. Works on both Standard and IA log groups. Queries scan log data on demand — you pay per GB scanned.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Key commands</div>
+        <div class="cw-desc">
+          <span class="ci">fields @timestamp, @message</span> — select fields<br>
+          <span class="ci">filter @message like /ERROR/</span> — filter by pattern<br>
+          <span class="ci">filter @message like /ERROR/ | stats count(*) by bin(5m)</span> — error rate over time<br>
+          <span class="ci">parse @message "* * *" as ip, user, action</span> — extract fields from unstructured logs<br>
+          <span class="ci">sort @timestamp desc | limit 50</span> — most recent first
+        </div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Auto-discovered fields</div>
+        <div class="cw-desc">For JSON logs, CloudWatch auto-discovers all top-level keys as queryable fields. <span class="ci">@timestamp</span>, <span class="ci">@message</span>, <span class="ci">@logStream</span>, <span class="ci">@log</span> are always available.</div>
+      </div>
+      <div class="cw-note">EKS control plane logs: you can query audit logs with Insights to investigate who called what API when — useful during incident response. Runs on IA groups too.</div>
+    </div>
+  </div>
+
+  <!-- LIVE TAIL -->
+  <div class="cw-card">
+    <div class="cw-card-head">
+      <span class="cw-num">06</span>
+      <span class="cw-card-title">Live Tail</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">What it does</div>
+        <div class="cw-desc">Streams log events in near-real-time directly in the AWS console — like <span class="ci">tail -f</span> for CloudWatch. Supports pattern filtering to reduce noise. Launched 2023.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Limitation</div>
+        <div class="cw-desc">Standard log groups only. IA log groups don't support it. This is why you verified no one was using Live Tail on the 8 EKS groups before converting them to IA.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Cost</div>
+        <div class="cw-desc">$0.01 per GB of scanned log data while a Live Tail session is active. Close the session when done.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="cw-card">
+    <div class="cw-card-head">
+      <span class="cw-num">07</span>
+      <span class="cw-card-title">CloudWatch Metrics</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">Namespace</div>
+        <div class="cw-desc">Container for metrics from the same service. AWS services use <span class="ci">AWS/EC2</span>, <span class="ci">AWS/EKS</span>, <span class="ci">AWS/RDS</span>, etc. Your custom metrics go in a namespace you choose: e.g. <span class="ci">Blinq/App</span>.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Dimensions</div>
+        <div class="cw-desc">Key-value pairs that slice a metric into sub-groups. <span class="ci">CPUUtilization</span> in namespace <span class="ci">AWS/EC2</span> with dimension <span class="ci">InstanceId=i-abc123</span> is a different metric from the same name with a different instance ID.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Statistics</div>
+        <div class="cw-desc">Average, Sum, Min, Max, SampleCount, pNN.NN (e.g. p99, p99.9). p-values require Extended Statistics and cost more. Average hides spikes — p99 is usually what you want for latency.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Resolution</div>
+        <div class="cw-desc">Standard metrics: 1-minute granularity, stored for 15 months. High-resolution custom metrics: 1-second granularity, costs $0.30/metric/month extra. Use for latency-sensitive services.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Metric Math</div>
+        <div class="cw-desc">Combine metrics with expressions in Grafana or CloudWatch dashboards. <span class="ci">errors / requests * 100</span> → error rate %. <span class="ci">FILL(m1, 0)</span> → treat missing data as zero.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALARMS -->
+  <div class="cw-card cw-highlight">
+    <div class="cw-card-head">
+      <span class="cw-num cw-num-accent">08</span>
+      <span class="cw-card-title">CloudWatch Alarms</span>
+      <span class="tag tag-amber" style="margin-left:auto">YOU BUILT THESE</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">States</div>
+        <div class="cw-desc"><strong style="color:var(--teal)">OK</strong> — metric within threshold. <strong style="color:var(--accent)">ALARM</strong> — threshold breached for required evaluation periods. <strong style="color:var(--muted)">INSUFFICIENT_DATA</strong> — not enough data points yet (e.g. new alarm, metric stopped publishing).</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Evaluation periods</div>
+        <div class="cw-desc">"M of N consecutive periods must breach." Example: 3 of 5 one-minute periods above threshold → ALARM. Prevents single-spike false alarms. More periods = slower to alarm and recover.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Missing data treatment</div>
+        <div class="cw-desc"><span class="ci">breaching</span> — treat as threshold exceeded (conservative). <span class="ci">notBreaching</span> — treat as OK (lenient). <span class="ci">ignore</span> — hold current state. <span class="ci">missing</span> → INSUFFICIENT_DATA. Default is <span class="ci">missing</span>.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Alarm actions</div>
+        <div class="cw-desc">SNS topic (→ email, Slack, Lambda, PagerDuty), EC2 action (stop/start/reboot/recover), Auto Scaling action (scale out/in), Systems Manager OpsItem.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Threshold types</div>
+        <div class="cw-desc">Static: fixed value. Anomaly detection: ML model learns normal band from historical data, alarms when metric exits the band. Useful for metrics with daily/weekly seasonality.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Composite alarms</div>
+        <div class="cw-desc">Combine multiple alarms with AND/OR/NOT logic. Example: ALARM if (high-CPU AND high-memory) — reduces noise. Only fires actions on the composite state, not the individual alarms.</div>
+      </div>
+      <div class="cw-note">Your 6 GuardDuty-replacement alarms used CloudTrail metric filters → metrics → alarms → SNS. Pattern: CloudTrail event log → metric filter counts matching API calls → alarm on count &gt; 0 → SNS → email.</div>
+    </div>
+  </div>
+
+  <!-- CONTAINER INSIGHTS -->
+  <div class="cw-card">
+    <div class="cw-card-head">
+      <span class="cw-num">09</span>
+      <span class="cw-card-title">Container Insights (EKS)</span>
+    </div>
+    <div class="cw-body">
+      <div class="cw-concept">
+        <div class="cw-term">What it does</div>
+        <div class="cw-desc">Deploys a CloudWatch agent as a DaemonSet on EKS nodes. Collects CPU, memory, disk, network metrics at the cluster, node, pod, and container level. Publishes to <span class="ci">ContainerInsights</span> namespace.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Cost consideration</div>
+        <div class="cw-desc">Generates a large number of custom metrics ($0.30/metric/month). On a large cluster this adds up fast. Evaluate whether Prometheus + Grafana (which you implemented) gives better value.</div>
+      </div>
+      <div class="cw-concept">
+        <div class="cw-term">Enhanced observability</div>
+        <div class="cw-desc">Newer Enhanced mode also collects application signals and adds tracing. Requires additional CloudWatch agent config and costs more.</div>
+      </div>
+      <div class="cw-note">You chose Prometheus + Grafana over Container Insights at Blinq.IO. Know why: more control over metrics, lower cost at scale, richer dashboards, and integrates with your Alertmanager → Slack pipeline.</div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.cw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.cw-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.cw-highlight { border-left: 3px solid var(--accent); }
+.cw-card-head { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+.cw-num { font-family: var(--font-mono); font-size: 11px; color: var(--muted); min-width: 24px; }
+.cw-num-accent { color: var(--accent); }
+.cw-card-title { font-family: var(--font-head); font-size: 14px; font-weight: normal; color: var(--text); }
+.cw-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.cw-concept { display: flex; flex-direction: column; gap: 3px; }
+.cw-term { font-family: var(--font-mono); font-size: 11px; color: var(--teal); font-weight: bold; }
+.cw-desc { font-size: 12px; color: var(--text); line-height: 1.55; }
+.cw-note { font-size: 12px; color: #7A93AE; background: var(--surface-2); border-left: 2px solid var(--accent); padding: 8px 10px; border-radius: 0 3px 3px 0; line-height: 1.5; }
+.cw-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.cw-compare-col { background: var(--surface); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.cw-compare-ia { background: rgba(78,205,196,0.04); }
+.cw-compare-head { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.cw-compare-item { font-size: 12px; color: var(--text); line-height: 1.4; }
+.cw-blocked { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(224,82,82,0.5); }
+.cw-price { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-top: 4px; }
+</style>
+
+<!-- ══ CHEAT SHEET ═════════════════════════════════ -->
+<div class="section-title">Quick-Recall Cheat Sheet — Scan Before You Walk In</div>
+<div class="cheat-grid">
+  <div class="cheat-cell">
+    <div class="cheat-tool">Inspector root cause</div>
+    <div class="cheat-def">Wildcard (*) rule + CONTINUOUS_SCAN on all 38 repos including dev = constant re-scan charges. Fix: *-prod only, SCAN_ON_PUSH.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">GuardDuty replacement</div>
+    <div class="cheat-def">6 CloudWatch alarms: root usage, unauthorized API calls, MFA-less login, IAM changes, CloudTrail changes, security group changes. Free via SNS.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">CloudWatch IA pre-checks</div>
+    <div class="cheat-def">No subscription filters + no metric filters + no live tail = safe to convert to IA. Export prod data to S3 first before recreating.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">EKS consolidation savings</div>
+    <div class="cheat-def">2 × ($0.10/hr × 730h) = $146/month control plane alone. Larger savings from eliminating duplicate node groups across 3 clusters.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">Karpenter provision flow</div>
+    <div class="cheat-def">Pending pod → unschedulable event → NodePool evaluated → best-fit instance type → EC2 RunInstances → node joins → pod scheduled.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">ArgoCD sync phases</div>
+    <div class="cheat-def">PreSync hook → resource apply (by wave) → PostSync hook → health check. Sync waves order resources within the apply phase.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">Kargo: Warehouse → Freight → Stage</div>
+    <div class="cheat-def">Warehouse watches source. Freight = immutable snapshot. Stage = environment. Promotion = advance Freight into Stage with optional verification.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">Prometheus rate() vs increase()</div>
+    <div class="cheat-def">rate() = per-second average over window. increase() = total increase over window. Both extrapolate for partial intervals at range edges.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">Terraform for_each vs count</div>
+    <div class="cheat-def">for_each keyed by string → add/remove items without shifting indices and destroying unrelated resources. count is fragile for collections.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">GitHub Actions OIDC to AWS</div>
+    <div class="cheat-def">No stored keys. GitHub issues OIDC JWT → AWS STS AssumeRoleWithWebIdentity → short-lived creds. Needs IAM OIDC identity provider + role trust policy.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">Zero-downtime deploy checklist</div>
+    <div class="cheat-def">Readiness probe ✓ · maxUnavailable: 0 ✓ · PodDisruptionBudget ✓ · terminationGracePeriodSeconds ✓ · preStop hook if in-flight drain needed ✓</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">RDS Multi-AZ vs Read Replica</div>
+    <div class="cheat-def">Multi-AZ = synchronous standby, automatic failover, HA. Read Replica = async copy for read scaling, manual promotion. Different purposes, different pricing.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">IRSA flow</div>
+    <div class="cheat-def">Annotate service account with IAM role ARN. EKS injects projected token. Pod exchanges token for AWS credentials via STS. No instance profile needed.</div>
+  </div>
+  <div class="cheat-cell">
+    <div class="cheat-tool">CloudFront ACM cert region</div>
+    <div class="cheat-def">CloudFront cert MUST be in us-east-1, regardless of origin region. ALB certs live in the same region as the ALB.</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function update(cb) {
+  cb.closest('.cl-item').classList.toggle('done', cb.checked);
+  recalc();
+}
+function recalc() {
+  const all = document.querySelectorAll('.cl-item input[type="checkbox"]');
+  const done = document.querySelectorAll('.cl-item input[type="checkbox"]:checked').length;
+  const total = all.length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('sbFill').style.width = pct + '%';
+  document.getElementById('sbPct').textContent = pct + '%';
+  document.getElementById('sbCount').textContent = done + ' / ' + total + ' topics covered';
+}
+recalc();
+</script>
+
+</body></html>

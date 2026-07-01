@@ -1,0 +1,782 @@
+<!doctype html><html><head><script>(()=>{function F(b){if(window===top)return;if(b.type==="auxclick"&&b.button!==1)return;const j=b.composedPath?b.composedPath():[b.target];let m=null;for(let y=0;y<j.length;y++){const x=j[y];if(x&&x.matches&&x.matches("a[href],area[href]")){m=x;break}}if(!m&&b.target&&b.target.closest){m=b.target.closest("a[href],area[href]")}if(!m)return;const B=m.getAttribute("href");if(!B)return;let q,C;try{q=new URL(B,document.baseURI);C=new URL(document.baseURI).origin}catch{return}if((q.protocol==="http:"||q.protocol==="https:")&&q.origin!==C){b.preventDefault();parent.postMessage({__frame_nav:true,url:q.href},"*")}}addEventListener("click",F,true);addEventListener("auxclick",F,true);var D={};function z(b){if(window===top)return;const j=Date.now();if(j-(D[b]||0)<500)return;D[b]=j;parent.postMessage({__frame_engaged:true,kind:b},"*")}addEventListener("scroll",()=>z("scroll"),{capture:true,passive:true});addEventListener("pointermove",()=>z("pointer"),{capture:true,passive:true});addEventListener("click",()=>z("click"),{capture:true,passive:true});})();</script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>Karpenter Deep Dive</title>
+<style>
+:root {
+  --ground: #0C1B2E;
+  --surface: #112240;
+  --surface-2: #172D4E;
+  --surface-3: #1D3560;
+  --border: #1E3A5F;
+  --text: #CCD6F6;
+  --muted: #6A8CAF;
+  --accent: #64FFDA;
+  --accent-dim: rgba(100,255,218,0.08);
+  --accent-border: rgba(100,255,218,0.2);
+  --amber: #F0A500;
+  --amber-dim: rgba(240,165,0,0.10);
+  --amber-border: rgba(240,165,0,0.25);
+  --font-head: Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, sans-serif;
+  --font-mono: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ground); color: var(--text); font-family: var(--font-body); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+/* HEADER */
+.header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 28px 36px 20px; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+.h1 { font-family: var(--font-head); font-size: 28px; font-weight: normal; color: var(--text); }
+.h1 em { font-style: normal; color: var(--accent); }
+.header-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* TABS */
+.tab-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 36px; display: flex; gap: 0; overflow-x: auto; }
+.tab-btn { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 13px 18px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: color 0.15s; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* CONTENT */
+.content { max-width: 1200px; margin: 0 auto; padding: 32px 36px 56px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* SHARED COMPONENTS */
+.tag { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; letter-spacing: 0.04em; display: inline-block; }
+.tag-green { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+.tag-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-border); }
+
+.section-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; margin-top: 28px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+.section-label:first-child { margin-top: 0; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 14px; }
+.card.accent-left { border-left: 3px solid var(--accent); }
+.card.amber-left { border-left: 3px solid var(--amber); }
+
+.card-title { font-family: var(--font-head); font-size: 16px; font-weight: normal; color: var(--text); margin-bottom: 8px; }
+.card-body { font-size: 13px; color: var(--text); line-height: 1.65; }
+.card-body p { margin-bottom: 8px; }
+.card-body p:last-child { margin-bottom: 0; }
+
+.kv { display: grid; grid-template-columns: 160px 1fr; gap: 6px 16px; margin-top: 10px; }
+.kv-key { font-family: var(--font-mono); font-size: 11px; color: var(--accent); padding-top: 2px; font-weight: bold; }
+.kv-val { font-size: 12px; color: var(--text); line-height: 1.55; }
+
+.note { background: var(--amber-dim); border-left: 2px solid var(--amber); padding: 10px 14px; border-radius: 0 4px 4px 0; font-size: 12px; color: var(--text); line-height: 1.55; margin-top: 12px; }
+.note-green { background: var(--accent-dim); border-left-color: var(--accent); }
+
+/* COMPARISON TABLE */
+.compare { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+.compare-head { display: grid; grid-template-columns: 200px 1fr 1fr; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+.compare-head div, .compare-row div { padding: 10px 14px; font-size: 13px; }
+.compare-head div { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.compare-row { display: grid; grid-template-columns: 200px 1fr 1fr; border-bottom: 1px solid var(--border); background: var(--surface); }
+.compare-row:last-child { border-bottom: none; }
+.compare-row:hover { background: var(--surface-2); }
+.compare-row .aspect { font-family: var(--font-mono); font-size: 11px; color: var(--muted); display: flex; align-items: center; border-right: 1px solid var(--border); }
+.compare-row .ka { color: var(--accent); }
+.compare-row .ca { color: var(--muted); }
+
+/* CODE BLOCKS */
+.code-wrap { background: #080F1A; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+.code-head { padding: 8px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.code-filename { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.code-badge { font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; border-radius: 2px; }
+pre { padding: 16px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 12px; line-height: 1.7; }
+.y-key { color: #79B8FF; }       /* YAML keys */
+.y-val { color: #9ECBFF; }       /* string values */
+.y-num { color: var(--accent); } /* numbers */
+.y-bool { color: var(--amber); } /* true/false */
+.y-comment { color: #4A6B8A; font-style: italic; } /* comments */
+.y-kind { color: #E3DCFB; }      /* kind values */
+.y-op { color: #F97583; }        /* operators */
+
+/* ANNOTATED YAML */
+.anno-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+@media (max-width: 900px) { .anno-wrap { grid-template-columns: 1fr; } }
+.anno-notes { display: flex; flex-direction: column; gap: 8px; padding-top: 0; }
+.anno-note { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; }
+.anno-num { font-family: var(--font-mono); font-size: 10px; color: var(--accent); margin-bottom: 4px; font-weight: bold; }
+.anno-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+/* FLOW DIAGRAM */
+.flow { display: flex; flex-direction: column; gap: 0; margin-bottom: 14px; max-width: 560px; }
+.flow-step { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; }
+.flow-step:not(:last-child) { border-bottom: 1px solid var(--border); }
+.flow-num { font-family: var(--font-mono); font-size: 11px; font-weight: bold; color: var(--accent); background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 3px; padding: 2px 8px; flex-shrink: 0; min-width: 36px; text-align: center; }
+.flow-body { flex: 1; }
+.flow-title { font-size: 13px; color: var(--text); font-weight: 500; margin-bottom: 2px; }
+.flow-detail { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* GRID LAYOUTS */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+/* ARCH DIAGRAM */
+.arch { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px; margin-bottom: 14px; }
+.arch-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
+.arch-row { display: flex; gap: 12px; margin-bottom: 10px; align-items: stretch; }
+.arch-box { border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; flex: 1; }
+.arch-box.system-box { border-color: var(--amber-border); background: var(--amber-dim); }
+.arch-box.app-box { border-color: var(--accent-border); background: var(--accent-dim); }
+.arch-box-title { font-family: var(--font-mono); font-size: 11px; font-weight: bold; margin-bottom: 6px; }
+.system-box .arch-box-title { color: var(--amber); }
+.app-box .arch-box-title { color: var(--accent); }
+.arch-box-items { font-size: 12px; color: var(--text); line-height: 1.7; }
+.arch-arrow { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 18px; padding: 0 4px; flex-shrink: 0; }
+</style>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="eyebrow">karpenter v1 · interview deep dive</div>
+  <h1 class="h1"><em>Karpenter</em> — Complete Study Guide</h1>
+  <p class="header-sub">Everything you implemented at Blinq.IO, with the vocabulary to explain it precisely.</p>
+</div>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('why')">01 Why Karpenter</button>
+  <button class="tab-btn" onclick="switchTab('how')">02 How It Works</button>
+  <button class="tab-btn" onclick="switchTab('nodepool')">03 NodePool</button>
+  <button class="tab-btn" onclick="switchTab('nodeclass')">04 EC2NodeClass</button>
+  <button class="tab-btn" onclick="switchTab('disruption')">05 Disruption</button>
+  <button class="tab-btn" onclick="switchTab('spot')">06 Spot Handling</button>
+  <button class="tab-btn" onclick="switchTab('setup')">07 Your Setup</button>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ═══ TAB 1: WHY KARPENTER ═══ -->
+<div class="tab-panel active" id="tab-why">
+
+  <div class="section-label">The Problem Karpenter Solves</div>
+
+  <div class="card accent-left">
+    <div class="card-title">Cluster Autoscaler's limitations</div>
+    <div class="card-body">
+      <p>Cluster Autoscaler (CA) works by scaling AWS Auto Scaling Groups. This creates a fundamental constraint: you must pre-define node groups with a fixed instance type (or a limited set). When pods are pending, CA just asks the ASG to add one more node of the type you pre-configured.</p>
+      <p>This leads to three problems: <strong>you often over-provision</strong> (pick a large enough instance for the worst case), <strong>you can't react to workload shape</strong> (a memory-intensive job needs a different instance than a CPU-intensive one), and <strong>scaling is slow</strong> (CA has to evaluate ASG state and wait for the ASG to respond).</p>
+    </div>
+  </div>
+
+  <div class="card accent-left">
+    <div class="card-title">What Karpenter does differently</div>
+    <div class="card-body">
+      <p>Karpenter watches for Pending pods directly and calls the EC2 API itself — no ASGs involved. It looks at what the pending pod actually needs (CPU, memory, GPU, architecture) and picks the cheapest instance type that fits, from any family. It provisions the node in seconds, not minutes.</p>
+      <p>When workloads consolidate (pods finish, traffic drops), Karpenter bin-packs the remaining pods onto fewer nodes and terminates the underutilised ones — CA cannot do this proactively.</p>
+    </div>
+  </div>
+
+  <div class="section-label">Side-by-Side Comparison</div>
+
+  <div class="compare">
+    <div class="compare-head">
+      <div>Aspect</div>
+      <div>Karpenter</div>
+      <div>Cluster Autoscaler</div>
+    </div>
+    <div class="compare-row">
+      <div class="aspect">Provisioning</div>
+      <div class="ka">Calls EC2 API directly. No node groups required.</div>
+      <div class="ca">Scales existing Auto Scaling Groups only.</div>
+    </div>
+    <div class="compare-row">
+      <div class="aspect">Instance selection</div>
+      <div class="ka">Picks best-fit instance type at provision time from any family.</div>
+      <div class="ca">Limited to instance types pre-configured in the node group.</div>
+    </div>
+    <div class="compare-row">
+      <div class="aspect">Scaling speed</div>
+      <div class="ka">~30–60 seconds from pending pod to running node.</div>
+      <div class="ca">1–3 minutes (ASG scale event + node bootstrap).</div>
+    </div>
+    <div class="compare-row">
+      <div class="aspect">Bin-packing</div>
+      <div class="ka">Consolidation: actively terminates underused nodes and reschedules pods.</div>
+      <div class="ca">Scale-down: removes empty nodes only. No active rebalancing.</div>
+    </div>
+    <div class="compare-row">
+      <div class="aspect">Spot handling</div>
+      <div class="ka">Native interruption handling via EventBridge. Multi-family Spot diversification via CreateFleet.</div>
+      <div class="ca">Requires separate Spot node groups. No native interruption handler.</div>
+    </div>
+    <div class="compare-row">
+      <div class="aspect">Configuration</div>
+      <div class="ka">NodePool + EC2NodeClass CRDs.</div>
+      <div class="ca">Node group config in EKS console / Terraform. No CRDs.</div>
+    </div>
+    <div class="compare-row">
+      <div class="aspect">Cost optimisation</div>
+      <div class="ka">Proactive: consolidation, right-sizing, Spot diversification.</div>
+      <div class="ca">Reactive: only removes completely empty nodes.</div>
+    </div>
+  </div>
+
+  <div class="note note-green">Interview answer for "Why did you choose Karpenter over Cluster Autoscaler?" — Lead with the cost angle (you're already known for the 50% reduction). Karpenter's bin-packing saved node hours CA would have left idle. Spot diversification with multi-family selection reduced interruption rates. Faster scaling improved dev experience on the shared cluster.</div>
+
+</div>
+
+<!-- ═══ TAB 2: HOW IT WORKS ═══ -->
+<div class="tab-panel" id="tab-how">
+
+  <div class="section-label">The Provisioning Loop</div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">01</div>
+      <div class="flow-body">
+        <div class="flow-title">Pod created, goes Pending</div>
+        <div class="flow-detail">kube-scheduler cannot find a node that satisfies the pod's resource requests, node selectors, tolerations, and affinity rules. Pod enters <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">Pending</code> with reason <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">Unschedulable</code>.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">02</div>
+      <div class="flow-body">
+        <div class="flow-title">Karpenter controller detects the pending pod</div>
+        <div class="flow-detail">Karpenter watches for pods with the Unschedulable condition. It batches pending pods together (default 1-second window) to provision one well-sized node instead of one node per pod.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">03</div>
+      <div class="flow-body">
+        <div class="flow-title">Karpenter evaluates NodePools</div>
+        <div class="flow-detail">For each matching NodePool, Karpenter simulates which instance types could schedule all pending pods. It filters by: requirements (instance family, zone, capacity type), resource limits, and taints/tolerations. Eliminates instance types that don't fit.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">04</div>
+      <div class="flow-body">
+        <div class="flow-title">Best instance type selected</div>
+        <div class="flow-detail">From the compatible set, Karpenter picks the cheapest option that can schedule all batched pods. For Spot, it calls <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">CreateFleet</code> with capacity-optimized-prioritized strategy — requests multiple instance types simultaneously so AWS picks the one with highest available capacity.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">05</div>
+      <div class="flow-body">
+        <div class="flow-title">NodeClaim created, EC2 instance provisioned</div>
+        <div class="flow-detail">Karpenter creates a NodeClaim object (the desired node spec) and calls EC2 <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">RunInstances</code> / <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">CreateFleet</code>. The node bootstraps, installs kubelet, and registers with the Kubernetes API server. Typically ~30–60 seconds total.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">06</div>
+      <div class="flow-body">
+        <div class="flow-title">Node registers, pods scheduled</div>
+        <div class="flow-detail">Once the node is Ready, kube-scheduler places the pending pods. Karpenter marks the NodeClaim as Launched. Karpenter labels the node with the NodePool name and all instance metadata (type, zone, capacity type, etc.).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">The Consolidation Loop (runs continuously)</div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">A</div>
+      <div class="flow-body">
+        <div class="flow-title">Karpenter evaluates all nodes for consolidation</div>
+        <div class="flow-detail">Periodically simulates: "if I moved all pods on node X to other existing nodes, would they fit?" If yes, the node is a consolidation candidate.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">B</div>
+      <div class="flow-body">
+        <div class="flow-title">Disruption budget check</div>
+        <div class="flow-detail">Before evicting anything, Karpenter checks the NodePool's disruption budget (max % of nodes that can be disrupted at once) and PodDisruptionBudgets on the pods. If the budget is exhausted, waits.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">C</div>
+      <div class="flow-body">
+        <div class="flow-title">Cordon, drain, terminate</div>
+        <div class="flow-detail">Node is cordoned (unschedulable). Pods are gracefully evicted (respecting terminationGracePeriodSeconds). Once empty, EC2 instance is terminated. Replacement node may be provisioned if needed for the evicted pods.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Three Things That Can Disrupt a Node</div>
+  <div class="three-col">
+    <div class="card">
+      <div class="card-title" style="font-size:14px">Consolidation</div>
+      <div class="card-body" style="font-size:12px">Workloads can fit on fewer nodes. Karpenter migrates pods and terminates the underutilised node. Controlled by <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">consolidationPolicy</code>.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px">Drift</div>
+      <div class="card-body" style="font-size:12px">Node no longer matches its NodePool (e.g. AMI updated, instance requirements changed). Karpenter replaces it with a compliant node. Enabled by default.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px">Expiry</div>
+      <div class="card-body" style="font-size:12px">Node reaches its <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">expireAfter</code> age (e.g. 720h = 30 days). Karpenter replaces it. Ensures OS patches are applied on a schedule without manual drains.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 3: NODEPOOL ═══ -->
+<div class="tab-panel" id="tab-nodepool">
+
+  <div class="section-label">What a NodePool Is</div>
+  <div class="card accent-left">
+    <div class="card-body">A NodePool is the Karpenter CRD that defines <strong>what kinds of nodes Karpenter is allowed to provision</strong>. It has two main parts: the <em>template</em> (what every node from this pool should look like) and the <em>pool-level config</em> (limits, disruption policy). You can have multiple NodePools — Karpenter picks the cheapest matching one when provisioning.</div>
+  </div>
+
+  <div class="section-label">Annotated NodePool — Application Workloads</div>
+  <div class="anno-wrap">
+    <div class="code-wrap">
+      <div class="code-head"><span class="code-filename">nodepool-application.yaml</span><span class="tag tag-green">karpenter.sh/v1</span></div>
+      <pre><span class="y-key">apiVersion</span>: <span class="y-val">karpenter.sh/v1</span>
+<span class="y-key">kind</span>: <span class="y-kind">NodePool</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-val">application</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">template</span>:                          <span class="y-comment"># ① node template</span>
+    <span class="y-key">metadata</span>:
+      <span class="y-key">labels</span>:
+        <span class="y-key">role</span>: <span class="y-val">application</span>
+    <span class="y-key">spec</span>:
+      <span class="y-key">nodeClassRef</span>:                   <span class="y-comment"># ② links to EC2NodeClass</span>
+        <span class="y-key">apiVersion</span>: <span class="y-val">karpenter.k8s.aws/v1</span>
+        <span class="y-key">kind</span>: <span class="y-kind">EC2NodeClass</span>
+        <span class="y-key">name</span>: <span class="y-val">application</span>
+      <span class="y-key">requirements</span>:                   <span class="y-comment"># ③ scheduling constraints</span>
+        - <span class="y-key">key</span>: <span class="y-val">karpenter.sh/capacity-type</span>
+          <span class="y-key">operator</span>: <span class="y-op">In</span>
+          <span class="y-key">values</span>: [<span class="y-val">"spot"</span>, <span class="y-val">"on-demand"</span>] <span class="y-comment"># Spot preferred, OD fallback</span>
+        - <span class="y-key">key</span>: <span class="y-val">karpenter.k8s.aws/instance-category</span>
+          <span class="y-key">operator</span>: <span class="y-op">In</span>
+          <span class="y-key">values</span>: [<span class="y-val">"c"</span>, <span class="y-val">"m"</span>, <span class="y-val">"r"</span>]  <span class="y-comment"># compute, general, memory</span>
+        - <span class="y-key">key</span>: <span class="y-val">karpenter.k8s.aws/instance-generation</span>
+          <span class="y-key">operator</span>: <span class="y-op">Gt</span>
+          <span class="y-key">values</span>: [<span class="y-val">"3"</span>]              <span class="y-comment"># 4th gen or newer</span>
+        - <span class="y-key">key</span>: <span class="y-val">kubernetes.io/arch</span>
+          <span class="y-key">operator</span>: <span class="y-op">In</span>
+          <span class="y-key">values</span>: [<span class="y-val">"amd64"</span>]
+      <span class="y-key">expireAfter</span>: <span class="y-val">720h</span>              <span class="y-comment"># ④ 30-day node rotation</span>
+      <span class="y-key">terminationGracePeriod</span>: <span class="y-val">48h</span>   <span class="y-comment"># ④ max drain time</span>
+  <span class="y-key">limits</span>:                           <span class="y-comment"># ⑤ hard ceiling</span>
+    <span class="y-key">cpu</span>: <span class="y-val">"1000"</span>
+    <span class="y-key">memory</span>: <span class="y-val">2000Gi</span>
+  <span class="y-key">disruption</span>:                       <span class="y-comment"># ⑥ consolidation policy</span>
+    <span class="y-key">consolidationPolicy</span>: <span class="y-val">WhenUnderutilized</span>
+    <span class="y-key">consolidateAfter</span>: <span class="y-val">5m</span>
+    <span class="y-key">budgets</span>:
+      - <span class="y-key">nodes</span>: <span class="y-val">"20%"</span>               <span class="y-comment"># max 20% disrupted at once</span></pre>
+    </div>
+    <div class="anno-notes">
+      <div class="anno-note">
+        <div class="anno-num">① template</div>
+        <div class="anno-text">Everything under <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">template</code> describes what each provisioned node will look like — labels applied to the node, taints, and the scheduling requirements. Labels are used by pod nodeSelectors or affinity rules.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">② nodeClassRef</div>
+        <div class="anno-text">Links to an EC2NodeClass which holds the AWS-specific config (AMI, subnets, security groups, IAM role). NodePool = what to provision. EC2NodeClass = how to provision it on AWS.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">③ requirements</div>
+        <div class="anno-text">Kubernetes label selectors that constrain what Karpenter can provision. <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">In</code> means "must be one of these values." Both pods AND Karpenter contribute requirements — the intersection must be non-empty for a pod to land on this NodePool. Listing c, m, r instance families gives Spot diversification across many instance types.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">④ expireAfter</div>
+        <div class="anno-text">Nodes older than 720h (30 days) are gracefully replaced. This forces OS patch rotation without manual node drains. <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">terminationGracePeriod</code> is the max time Karpenter will wait for pods to drain before force-terminating.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">⑤ limits</div>
+        <div class="anno-text">Hard ceiling on total resources Karpenter will provision for this NodePool. Once hit, pending pods stay Pending — Karpenter will not provision more nodes. Protects against runaway scaling (e.g. infinite loop creating jobs).</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">⑥ disruption</div>
+        <div class="anno-text"><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">WhenUnderutilized</code>: consolidate when pods can fit on fewer nodes. <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">consolidateAfter</code>: wait 5 minutes of being underutilized before acting. Budget: never disrupt more than 20% of this pool's nodes at once.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Key Requirements Labels</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" style="font-size:13px">Karpenter-specific labels</div>
+      <div class="kv">
+        <div class="kv-key">capacity-type</div><div class="kv-val"><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">spot</code> or <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">on-demand</code>. List both with Spot first in priority — Karpenter prefers the cheapest.</div>
+        <div class="kv-key">instance-category</div><div class="kv-val"><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">c</code> (compute), <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">m</code> (general), <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">r</code> (memory), <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">t</code> (burstable — avoid for prod). Multiple values = more Spot options.</div>
+        <div class="kv-key">instance-size</div><div class="kv-val">Can restrict to specific sizes: <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">["large","xlarge","2xlarge"]</code>. Leave open if you want Karpenter to right-size freely.</div>
+        <div class="kv-key">instance-generation</div><div class="kv-val"><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">Gt "3"</code> means gen 4+ only. Newer gens have better price-to-performance. Avoids very old instances.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:13px">Standard Kubernetes labels</div>
+      <div class="kv">
+        <div class="kv-key">kubernetes.io/arch</div><div class="kv-val"><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">amd64</code> or <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">arm64</code>. Graviton (arm64) is cheaper — restrict to amd64 only if your images aren't multi-arch.</div>
+        <div class="kv-key">topology.kubernetes.io/zone</div><div class="kv-val">Pin to specific AZs. Usually leave open so Karpenter spreads across zones for availability.</div>
+        <div class="kv-key">node.kubernetes.io/instance-type</div><div class="kv-val">Can explicitly allow/deny specific types: <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">NotIn ["t3.nano","t3.micro"]</code>.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 4: EC2NODECLASS ═══ -->
+<div class="tab-panel" id="tab-nodeclass">
+
+  <div class="section-label">What EC2NodeClass Is</div>
+  <div class="card accent-left">
+    <div class="card-body">EC2NodeClass is the AWS-provider-specific CRD. While NodePool defines scheduling constraints (what pods need), EC2NodeClass defines how to actually launch that node on AWS — which AMI, which subnets, which security groups, which IAM instance profile. One EC2NodeClass can be shared across multiple NodePools.</div>
+  </div>
+
+  <div class="section-label">Annotated EC2NodeClass</div>
+  <div class="anno-wrap">
+    <div class="code-wrap">
+      <div class="code-head"><span class="code-filename">ec2nodeclass.yaml</span><span class="tag tag-green">karpenter.k8s.aws/v1</span></div>
+      <pre><span class="y-key">apiVersion</span>: <span class="y-val">karpenter.k8s.aws/v1</span>
+<span class="y-key">kind</span>: <span class="y-kind">EC2NodeClass</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-val">application</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">amiSelectorTerms</span>:             <span class="y-comment"># ① which AMI to use</span>
+    - <span class="y-key">alias</span>: <span class="y-val">al2023@latest</span>      <span class="y-comment"># always latest AL2023 EKS AMI</span>
+
+  <span class="y-key">role</span>: <span class="y-val">KarpenterNodeRole-cluster</span> <span class="y-comment"># ② IAM role for node</span>
+
+  <span class="y-key">subnetSelectorTerms</span>:          <span class="y-comment"># ③ which subnets to use</span>
+    - <span class="y-key">tags</span>:
+        <span class="y-key">karpenter.sh/discovery</span>: <span class="y-val">my-cluster</span>
+
+  <span class="y-key">securityGroupSelectorTerms</span>:   <span class="y-comment"># ④ security groups</span>
+    - <span class="y-key">tags</span>:
+        <span class="y-key">karpenter.sh/discovery</span>: <span class="y-val">my-cluster</span>
+
+  <span class="y-key">tags</span>:                          <span class="y-comment"># ⑤ EC2 instance tags</span>
+    <span class="y-key">Name</span>: <span class="y-val">karpenter-application-node</span>
+    <span class="y-key">Environment</span>: <span class="y-val">production</span>
+    <span class="y-key">karpenter.sh/discovery</span>: <span class="y-val">my-cluster</span>
+
+  <span class="y-key">blockDeviceMappings</span>:           <span class="y-comment"># ⑥ root volume config</span>
+    - <span class="y-key">deviceName</span>: <span class="y-val">/dev/xvda</span>
+      <span class="y-key">ebs</span>:
+        <span class="y-key">volumeSize</span>: <span class="y-num">50</span><span class="y-val">Gi</span>
+        <span class="y-key">volumeType</span>: <span class="y-val">gp3</span>
+        <span class="y-key">encrypted</span>: <span class="y-bool">true</span>
+        <span class="y-key">deleteOnTermination</span>: <span class="y-bool">true</span></pre>
+    </div>
+    <div class="anno-notes">
+      <div class="anno-note">
+        <div class="anno-num">① amiSelectorTerms</div>
+        <div class="anno-text"><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">alias: al2023@latest</code> automatically uses the latest EKS-optimised AL2023 AMI for your cluster version. Karpenter resolves this at provision time — so new nodes always get patched AMIs. Alternative: pin to a specific AMI ID, or use a tag selector for your golden AMI.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">② role</div>
+        <div class="anno-text">IAM instance profile role assigned to the EC2 node. Must have the <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">KarpenterNodeRole</code> managed policies (AmazonEKSWorkerNodePolicy, AmazonEC2ContainerRegistryReadOnly, AmazonEKS_CNI_Policy). This is separate from IRSA — it's the node-level role, not the pod-level role.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">③ subnetSelectorTerms</div>
+        <div class="anno-text">Karpenter launches nodes into subnets matching these tags. Tag your private subnets with <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">karpenter.sh/discovery: cluster-name</code> in Terraform/the console. Karpenter automatically uses multiple subnets for AZ spreading.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">④ securityGroupSelectorTerms</div>
+        <div class="anno-text">Same tag-based discovery for security groups. Tag your node security group with the discovery tag. Karpenter automatically applies the cluster's node security group which allows communication with the control plane.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">⑤ tags</div>
+        <div class="anno-text">EC2 instance tags applied to every Karpenter-provisioned node. Critical for cost allocation (you can split costs by NodePool/environment in Cost Explorer), for compliance, and for the discovery tag used by subnet/SG selectors on the node itself.</div>
+      </div>
+      <div class="anno-note">
+        <div class="anno-num">⑥ blockDeviceMappings</div>
+        <div class="anno-text">Root EBS volume config. gp3 is cheaper and faster than gp2. Set size large enough for container images + logs. <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">deleteOnTermination: true</code> ensures volumes are cleaned up when nodes are terminated by consolidation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">AMI Families</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="kv">
+        <div class="kv-key">AL2023</div><div class="kv-val">Amazon Linux 2023. Recommended for new clusters. Containerd runtime, SELinux, better security baseline. <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">alias: al2023@latest</code></div>
+        <div class="kv-key">AL2</div><div class="kv-val">Amazon Linux 2. Legacy — will reach end of support. Use AL2023 for new deployments. <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">alias: al2@latest</code></div>
+        <div class="kv-key">Bottlerocket</div><div class="kv-val">Container-optimised OS from AWS. Immutable, auto-updates. Good for security-conscious environments. No SSH by default.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kv">
+        <div class="kv-key">Custom AMI</div><div class="kv-val">Use <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">amiSelectorTerms: [{tags: {my-tag: "my-value"}}]</code> to pin to a golden AMI built by your team.</div>
+        <div class="kv-key">userData</div><div class="kv-val">Bootstrap script injected into the EC2 user data. Karpenter auto-generates the kubelet config — you add extra steps here (e.g. mount EFS, custom sysctl settings).</div>
+        <div class="kv-key">instanceStorePolicy</div><div class="kv-val"><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">RAID0</code> to use local NVMe SSDs as ephemeral storage. Useful for high-IOPS workloads like Kafka, etcd.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 5: DISRUPTION ═══ -->
+<div class="tab-panel" id="tab-disruption">
+
+  <div class="section-label">Consolidation Policies</div>
+
+  <div class="two-col">
+    <div class="card accent-left">
+      <div class="card-title">WhenUnderutilized</div>
+      <div class="card-body" style="font-size:12px">
+        <p>Karpenter checks: "can all pods on this node fit on other existing nodes?" If yes → evict pods and terminate node. Actively bin-packs your cluster.</p>
+        <p style="margin-top:8px"><strong>Use for:</strong> application node pools with stateless, interruptible workloads. Maximum cost savings.</p>
+        <p style="margin-top:8px"><strong>Risk:</strong> pods are periodically evicted and rescheduled. Requires PodDisruptionBudgets to be set, or availability can dip during consolidation.</p>
+      </div>
+      <div class="note note-green" style="margin-top:12px">This is what you used for your application NodePool at Blinq.IO.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">WhenEmpty</div>
+      <div class="card-body" style="font-size:12px">
+        <p>Only terminates a node when it has zero pods (DaemonSet pods don't count). Much safer — no forced evictions, but also less aggressive savings.</p>
+        <p style="margin-top:8px"><strong>Use for:</strong> system node pools, nodes running critical workloads, or any pool where pod disruption is unacceptable.</p>
+        <p style="margin-top:8px"><strong>Behaviour:</strong> as workloads naturally complete and pods move away, the empty node is terminated. No active bin-packing.</p>
+      </div>
+      <div class="note" style="margin-top:12px">Use this for your system NodePool to prevent kube-system pods from being evicted.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Disruption Budgets</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-filename">disruption budget examples</span></div>
+    <pre><span class="y-key">disruption</span>:
+  <span class="y-key">consolidationPolicy</span>: <span class="y-val">WhenUnderutilized</span>
+  <span class="y-key">consolidateAfter</span>: <span class="y-val">5m</span>   <span class="y-comment"># wait 5m before acting on underutilized node</span>
+  <span class="y-key">budgets</span>:
+    <span class="y-comment"># Default: max 10% of nodes disrupted at any one time</span>
+    - <span class="y-key">nodes</span>: <span class="y-val">"10%"</span>
+
+    <span class="y-comment"># During business hours (9am–5pm UTC Mon–Fri): allow 0 disruptions</span>
+    - <span class="y-key">schedule</span>: <span class="y-val">"0 9 * * 1-5"</span>
+      <span class="y-key">duration</span>: <span class="y-val">8h</span>
+      <span class="y-key">nodes</span>: <span class="y-val">"0"</span>
+
+    <span class="y-comment"># Outside business hours: allow up to 5 nodes disrupted at once</span>
+    - <span class="y-key">nodes</span>: <span class="y-val">"5"</span>        <span class="y-comment"># absolute count, not percentage</span></pre>
+  </div>
+
+  <div class="card-body" style="font-size:13px;margin-bottom:14px">Budgets are evaluated <strong>in order</strong> — first matching budget wins. Schedule budgets let you pause consolidation during peak hours (so you don't evict pods when users are active) and allow aggressive consolidation at night when it's cheaper and lower risk.</div>
+
+  <div class="section-label">Drift</div>
+  <div class="card accent-left">
+    <div class="card-body">
+      <p>Drift happens when a node's current state no longer matches what its NodePool or EC2NodeClass specifies. Karpenter detects and replaces drifted nodes automatically.</p>
+      <div class="kv" style="margin-top:10px">
+        <div class="kv-key">AMI drift</div><div class="kv-val">A new EKS AMI was released (<code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">al2023@latest</code> points to a newer AMI). Nodes running the old AMI are drifted → replaced with nodes running the new AMI. This is how Karpenter automates OS patching.</div>
+        <div class="kv-key">Requirements drift</div><div class="kv-val">You changed the NodePool requirements (added a new instance family, changed capacity type). Existing nodes that don't match are replaced.</div>
+        <div class="kv-key">NodeClass drift</div><div class="kv-val">You updated the EC2NodeClass (changed subnets, security groups, volume size). All nodes from that class are considered drifted and are gradually replaced.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Node Expiry</div>
+  <div class="card">
+    <div class="card-body">
+      <p><code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">expireAfter: 720h</code> in the NodePool template forces node rotation after 30 days. Even if no new AMI is released, this ensures security patches applied to the base OS are picked up on the next bootstrap.</p>
+      <p style="margin-top:8px">When a node expires: Karpenter provisions a replacement node first, then drains and terminates the old one (with the disruption budget respected). Zero-downtime rotation — pods move to the new node before the old one is gone.</p>
+    </div>
+    <div class="note" style="margin-top:12px">This is much better than "we update nodes manually" or relying on Managed Node Group update events. With expiry, node patching is automatic and continuous.</div>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 6: SPOT HANDLING ═══ -->
+<div class="tab-panel" id="tab-spot">
+
+  <div class="section-label">How Karpenter Requests Spot</div>
+  <div class="card accent-left">
+    <div class="card-body">
+      <p>When the pending pod's requirements allow Spot capacity, Karpenter calls EC2 <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">CreateFleet</code> with <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">AllocationStrategy: capacity-optimized-prioritized</code>. This means:</p>
+      <p style="margin-top:8px">Karpenter submits a list of compatible instance types (e.g. c5.xlarge, c5a.xlarge, m5.xlarge, m5a.xlarge, r5.xlarge…). AWS selects the one with the <strong>deepest available Spot capacity pool</strong> — the instance type least likely to be interrupted in that moment.</p>
+    </div>
+  </div>
+
+  <div class="note note-green">This is why you list multiple instance categories (c, m, r) in your NodePool requirements. The more instance types Karpenter can choose from, the better the interruption rate. Restricting to a single instance type defeats Spot diversification.</div>
+
+  <div class="section-label">Interruption Flow (2-minute warning)</div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">01</div>
+      <div class="flow-body">
+        <div class="flow-title">AWS sends Spot interruption notice</div>
+        <div class="flow-detail">AWS publishes an EC2 Spot Instance Interruption Warning to EventBridge exactly 2 minutes before the instance is reclaimed. Karpenter subscribes to this event via an SQS queue.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">02</div>
+      <div class="flow-body">
+        <div class="flow-title">Karpenter cordons the node immediately</div>
+        <div class="flow-detail">The node is marked <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">unschedulable</code> instantly. No new pods will be scheduled onto it. This happens faster than the 2-minute window starts.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">03</div>
+      <div class="flow-body">
+        <div class="flow-title">Karpenter provisions a replacement node</div>
+        <div class="flow-detail">Karpenter immediately starts provisioning a new node (different instance type) for the pods that will be evicted. It doesn't wait for the old node to terminate first.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">04</div>
+      <div class="flow-body">
+        <div class="flow-title">Pods drained with respect to PDBs</div>
+        <div class="flow-detail">Karpenter evicts pods respecting PodDisruptionBudgets. If a PDB prevents eviction (minimum available pods would be violated), Karpenter waits. Pods move to the new node as it becomes Ready.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">05</div>
+      <div class="flow-body">
+        <div class="flow-title">AWS terminates the Spot instance</div>
+        <div class="flow-detail">At the 2-minute mark, AWS terminates the instance. Because Karpenter already cordoned and drained it, there are no running workloads left. Clean termination.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">What You Need For Spot to Work Reliably</div>
+  <div class="three-col">
+    <div class="card">
+      <div class="card-title" style="font-size:13px">PodDisruptionBudget</div>
+      <div class="card-body" style="font-size:12px">Set on every Deployment that runs on Spot nodes. Without a PDB, all replicas could be evicted simultaneously during a Spot interruption.<br><br>
+      <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">minAvailable: 1</code> or <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">maxUnavailable: 1</code>.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:13px">terminationGracePeriodSeconds</div>
+      <div class="card-body" style="font-size:12px">Give pods time to finish in-flight requests before being killed. Set on the Pod spec. 30s is the Kubernetes default — may need to be longer for long-running jobs or connections.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:13px">Readiness probes on the replacement</div>
+      <div class="card-body" style="font-size:12px">Traffic is only routed to the new pod after its readiness probe passes. Without this, pods on the new node receive requests before they're ready, causing errors during the transition.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Spot vs On-Demand Selection</div>
+  <div class="card">
+    <div class="card-body">When both <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">spot</code> and <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">on-demand</code> are in requirements, Karpenter picks Spot first because it's cheaper. It only falls back to On-Demand when no Spot capacity is available for any of the compatible instance types. This is why listing many instance families matters — it significantly reduces the chance all Spot pools are dry simultaneously.</div>
+  </div>
+
+</div>
+
+<!-- ═══ TAB 7: YOUR SETUP ═══ -->
+<div class="tab-panel" id="tab-setup">
+
+  <div class="section-label">Your Architecture at Blinq.IO</div>
+
+  <div class="arch">
+    <div class="arch-label">Cluster Node Architecture</div>
+    <div class="arch-row">
+      <div class="arch-box system-box" style="flex:1">
+        <div class="arch-box-title">SYSTEM NODEPOOL — On-Demand</div>
+        <div class="arch-box-items">
+          kube-system (CoreDNS, kube-proxy, aws-node)<br>
+          Karpenter controller itself<br>
+          ArgoCD / Kargo controllers<br>
+          Prometheus, Alertmanager<br>
+          Cert-manager, External-DNS
+        </div>
+      </div>
+      <div class="arch-box app-box" style="flex:2">
+        <div class="arch-box-title">APPLICATION NODEPOOL — Spot-preferred + On-Demand fallback</div>
+        <div class="arch-box-items">
+          Application services (stateless)<br>
+          Dev namespace workloads<br>
+          Stage namespace workloads<br>
+          Batch / background jobs
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Why Two NodePools?</div>
+  <div class="card amber-left">
+    <div class="card-body">
+      <p>If everything ran on Spot, a Spot interruption event could evict Karpenter itself (or CoreDNS, or the CNI). Then you'd have no network, no DNS, and Karpenter wouldn't be able to provision replacement nodes. The cluster would be paralysed.</p>
+      <p style="margin-top:8px">By putting critical infrastructure on On-Demand nodes in the system pool, Spot interruptions only affect application pods — which have PDBs and graceful shutdown configured. The control plane always stays up.</p>
+    </div>
+    <div class="note" style="margin-top:12px">The interviewer will likely ask "how do you make sure Karpenter doesn't evict itself?" — the answer is: system NodePool is On-Demand only, and critical pods have a taint that prevents them landing on the Spot application pool.</div>
+  </div>
+
+  <div class="section-label">NodePool Configs for Your Setup</div>
+
+  <div class="two-col">
+    <div class="code-wrap">
+      <div class="code-head"><span class="code-filename">system NodePool</span><span class="tag tag-amber">On-Demand only</span></div>
+      <pre><span class="y-key">apiVersion</span>: <span class="y-val">karpenter.sh/v1</span>
+<span class="y-key">kind</span>: <span class="y-kind">NodePool</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-val">system</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">template</span>:
+    <span class="y-key">spec</span>:
+      <span class="y-key">nodeClassRef</span>:
+        <span class="y-key">name</span>: <span class="y-val">system</span>
+      <span class="y-key">requirements</span>:
+        - <span class="y-key">key</span>: <span class="y-val">karpenter.sh/capacity-type</span>
+          <span class="y-key">operator</span>: <span class="y-op">In</span>
+          <span class="y-key">values</span>: [<span class="y-val">"on-demand"</span>]  <span class="y-comment"># NO spot</span>
+        - <span class="y-key">key</span>: <span class="y-val">karpenter.k8s.aws/instance-category</span>
+          <span class="y-key">operator</span>: <span class="y-op">In</span>
+          <span class="y-key">values</span>: [<span class="y-val">"m"</span>]
+      <span class="y-key">taints</span>:
+        - <span class="y-key">key</span>: <span class="y-val">CriticalAddonsOnly</span>   <span class="y-comment"># keeps app pods off this pool</span>
+          <span class="y-key">effect</span>: <span class="y-val">NoSchedule</span>
+  <span class="y-key">limits</span>:
+    <span class="y-key">cpu</span>: <span class="y-val">"100"</span>
+  <span class="y-key">disruption</span>:
+    <span class="y-key">consolidationPolicy</span>: <span class="y-val">WhenEmpty</span>  <span class="y-comment"># safe, no forced evictions</span>
+    <span class="y-key">consolidateAfter</span>: <span class="y-val">30m</span></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-head"><span class="code-filename">application NodePool</span><span class="tag tag-green">Spot-preferred</span></div>
+      <pre><span class="y-key">apiVersion</span>: <span class="y-val">karpenter.sh/v1</span>
+<span class="y-key">kind</span>: <span class="y-kind">NodePool</span>
+<span class="y-key">metadata</span>:
+  <span class="y-key">name</span>: <span class="y-val">application</span>
+<span class="y-key">spec</span>:
+  <span class="y-key">template</span>:
+    <span class="y-key">spec</span>:
+      <span class="y-key">nodeClassRef</span>:
+        <span class="y-key">name</span>: <span class="y-val">application</span>
+      <span class="y-key">requirements</span>:
+        - <span class="y-key">key</span>: <span class="y-val">karpenter.sh/capacity-type</span>
+          <span class="y-key">operator</span>: <span class="y-op">In</span>
+          <span class="y-key">values</span>: [<span class="y-val">"spot"</span>, <span class="y-val">"on-demand"</span>]
+        - <span class="y-key">key</span>: <span class="y-val">karpenter.k8s.aws/instance-category</span>
+          <span class="y-key">operator</span>: <span class="y-op">In</span>
+          <span class="y-key">values</span>: [<span class="y-val">"c"</span>, <span class="y-val">"m"</span>, <span class="y-val">"r"</span>]  <span class="y-comment"># diversified</span>
+      <span class="y-key">expireAfter</span>: <span class="y-val">720h</span>
+  <span class="y-key">limits</span>:
+    <span class="y-key">cpu</span>: <span class="y-val">"1000"</span>
+    <span class="y-key">memory</span>: <span class="y-val">2000Gi</span>
+  <span class="y-key">disruption</span>:
+    <span class="y-key">consolidationPolicy</span>: <span class="y-val">WhenUnderutilized</span>
+    <span class="y-key">consolidateAfter</span>: <span class="y-val">5m</span>
+    <span class="y-key">budgets</span>:
+      - <span class="y-key">nodes</span>: <span class="y-val">"20%"</span>         <span class="y-comment"># max 20% disrupted at once</span></pre>
+    </div>
+  </div>
+
+  <div class="section-label">Interview Q&amp;A — Your Setup</div>
+
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px">"How does a pod end up on the system pool vs the application pool?"</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6">System pool nodes have a taint <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">CriticalAddonsOnly: NoSchedule</code>. Only pods with a matching toleration (kube-system components do) can land there. Application pods have no such toleration, so they can only go on application pool nodes. This is the separation mechanism.</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px">"What happens if all Spot capacity is exhausted?"</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6">The application NodePool has both <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">spot</code> and <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">on-demand</code> in its capacity type requirement. Karpenter prefers Spot (cheaper), but falls back to On-Demand automatically if no Spot capacity is available across all compatible instance types. Pods continue to be scheduled — at a higher cost, but without interruption.</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px">"How did Karpenter save money compared to what you had before?"</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6">Before Karpenter, we had static node groups — nodes ran 24/7 regardless of actual pod load. Karpenter's consolidation terminates underutilised nodes (WhenUnderutilized policy on the application pool). Plus Spot adoption for stateless workloads directly reduced EC2 costs by 60–70% for those node hours. And right-sizing: Karpenter picks the cheapest instance type that fits the actual pod requests, instead of us picking one large enough for the worst case.</div>
+  </div>
+
+</div>
+</div>
+<!-- end content -->
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body></html>

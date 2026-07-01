@@ -1,0 +1,1644 @@
+<!doctype html><html><head><script>(()=>{function F(b){if(window===top)return;if(b.type==="auxclick"&&b.button!==1)return;const j=b.composedPath?b.composedPath():[b.target];let m=null;for(let y=0;y<j.length;y++){const x=j[y];if(x&&x.matches&&x.matches("a[href],area[href]")){m=x;break}}if(!m&&b.target&&b.target.closest){m=b.target.closest("a[href],area[href]")}if(!m)return;const B=m.getAttribute("href");if(!B)return;let q,C;try{q=new URL(B,document.baseURI);C=new URL(document.baseURI).origin}catch{return}if((q.protocol==="http:"||q.protocol==="https:")&&q.origin!==C){b.preventDefault();parent.postMessage({__frame_nav:true,url:q.href},"*")}}addEventListener("click",F,true);addEventListener("auxclick",F,true);var D={};function z(b){if(window===top)return;const j=Date.now();if(j-(D[b]||0)<500)return;D[b]=j;parent.postMessage({__frame_engaged:true,kind:b},"*")}addEventListener("scroll",()=>z("scroll"),{capture:true,passive:true});addEventListener("pointermove",()=>z("pointer"),{capture:true,passive:true});addEventListener("click",()=>z("click"),{capture:true,passive:true});})();</script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitOps Interview Prep — Megha Shivhare</title>
+<style>
+  :root {
+    --ground: #0D1117;
+    --surface: #161B22;
+    --surface-alt: #1C2128;
+    --border: #30363D;
+    --text: #CDD9E5;
+    --text-muted: #7D8590;
+    --text-dim: #484F58;
+    --accent: #58A6FF;
+    --dev: #E6A817;
+    --stage: #2DD4BF;
+    --prod: #F472B6;
+    --mono: ui-monospace, 'Cascadia Code', 'SF Mono', 'Fira Code', Consolas, monospace;
+    --sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --nav-w: 240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .packet { animation: none !important; }
+    .hero-cursor { animation: none !important; }
+  }
+
+  /* ── LAYOUT ─────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: var(--nav-w) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── NAV / PIPELINE ──────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .nav-brand strong {
+    display: block;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 2px;
+    letter-spacing: 0.04em;
+  }
+
+  .pipeline-track {
+    flex: 1;
+    position: relative;
+    padding: 0 1.5rem;
+  }
+
+  .pipeline-line {
+    position: absolute;
+    left: calc(1.5rem + 7px);
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom,
+      var(--dev) 0%,
+      var(--dev) 33%,
+      var(--stage) 45%,
+      var(--stage) 66%,
+      var(--prod) 78%,
+      var(--prod) 100%
+    );
+    opacity: 0.35;
+  }
+
+  .packet {
+    position: absolute;
+    left: calc(1.5rem + 4px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    animation: flow 4s ease-in-out infinite;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  @keyframes flow {
+    0%   { top: 0%; opacity: 0; }
+    8%   { opacity: 0.6; }
+    90%  { opacity: 0.6; }
+    100% { top: calc(100% - 8px); opacity: 0; }
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    transition: color 0.15s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-item:hover, .nav-item:focus {
+    color: var(--text);
+    outline: none;
+  }
+
+  .nav-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .nav-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    flex-shrink: 0;
+    background: var(--surface);
+    transition: background 0.15s;
+  }
+
+  .nav-item.dev  .nav-dot { border-color: var(--dev);   }
+  .nav-item.stg  .nav-dot { border-color: var(--stage); }
+  .nav-item.prd  .nav-dot { border-color: var(--prod);  }
+  .nav-item.ref  .nav-dot { border-color: var(--accent);}
+
+  .nav-item.dev:hover  .nav-dot { background: var(--dev);   }
+  .nav-item.stg:hover  .nav-dot { background: var(--stage); }
+  .nav-item.prd:hover  .nav-dot { background: var(--prod);  }
+  .nav-item.ref:hover  .nav-dot { background: var(--accent);}
+
+  .nav-label { line-height: 1.2; }
+  .nav-label span { display: block; font-size: 10px; font-family: var(--mono); letter-spacing: 0.06em; opacity: 0.6; }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1rem 0;
+  }
+
+  .nav-qa-link {
+    margin-top: auto;
+    padding: 1rem 1.5rem 0;
+  }
+
+  .qa-pill {
+    display: block;
+    background: linear-gradient(135deg, #1a2a1a, #1a1a2a);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 12px;
+    transition: border-color 0.15s;
+  }
+
+  .qa-pill:hover { border-color: var(--accent); }
+
+  .qa-pill strong {
+    display: block;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+
+  /* ── MAIN CONTENT ────────────────────────────── */
+  main {
+    padding: 3rem 4rem;
+    max-width: 920px;
+  }
+
+  /* ── HERO ────────────────────────────────────── */
+  .hero {
+    margin-bottom: 4rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.8;
+  }
+
+  .hero-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 1.75rem;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  .tag-dev   { background: rgba(230,168,23,0.12);  color: var(--dev);   border: 1px solid rgba(230,168,23,0.25); }
+  .tag-stage { background: rgba(45,212,191,0.10);  color: var(--stage); border: 1px solid rgba(45,212,191,0.25); }
+  .tag-prod  { background: rgba(244,114,182,0.10); color: var(--prod);  border: 1px solid rgba(244,114,182,0.25); }
+  .tag-ref   { background: rgba(88,166,255,0.10);  color: var(--accent); border: 1px solid rgba(88,166,255,0.25); }
+
+  /* ── SECTION ──────────────────────────────────── */
+  .section {
+    margin-bottom: 4rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .section h2 {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .section-body {
+    padding-left: 2.5rem;
+  }
+
+  .section p {
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  .section p:last-child { margin-bottom: 0; }
+
+  /* ── CONCEPT BLOCKS ──────────────────────────── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .concept-card {
+    background: var(--surface);
+    padding: 1.25rem;
+  }
+
+  .concept-card h4 {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .concept-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* ── COMPARISON TABLE ─────────────────────────── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .compare-col {
+    background: var(--surface);
+    padding: 1.25rem;
+  }
+
+  .compare-col h4 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .compare-col.push h4 { color: var(--prod); }
+  .compare-col.pull h4 { color: var(--stage); }
+
+  .compare-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .compare-col li {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-left: 1.1rem;
+    position: relative;
+  }
+
+  .compare-col.push li::before { content: '✗'; position: absolute; left: 0; color: var(--prod); font-size: 11px; top: 1px; }
+  .compare-col.pull li::before { content: '✓'; position: absolute; left: 0; color: var(--stage); font-size: 11px; top: 1px; }
+
+  /* ── CODE BLOCK ────────────────────────────────── */
+  .code-block {
+    background: #010409;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .code-block-header {
+    background: var(--surface-alt);
+    padding: 8px 1rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .code-block-header .lang-badge {
+    background: var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .code-block pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .ky { color: #FF7B72; }   /* yaml key / keyword */
+  .kv { color: #79C0FF; }   /* value / string */
+  .km { color: #D2A8FF; }   /* metadata / special */
+  .kc { color: #7D8590; }   /* comment */
+  .ka { color: var(--dev); } /* annotation / highlight */
+  .ks { color: var(--stage); } /* stage color */
+  .kp { color: var(--prod); }  /* prod color */
+
+  /* ── FLOW DIAGRAM ─────────────────────────────── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .flow-node {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .flow-node.dev-node   { border-color: rgba(230,168,23,0.4);  color: var(--dev);   background: rgba(230,168,23,0.05); }
+  .flow-node.stage-node { border-color: rgba(45,212,191,0.4);  color: var(--stage); background: rgba(45,212,191,0.05); }
+  .flow-node.prod-node  { border-color: rgba(244,114,182,0.4); color: var(--prod);  background: rgba(244,114,182,0.05); }
+  .flow-node.ci-node    { border-color: rgba(88,166,255,0.4);  color: var(--accent); background: rgba(88,166,255,0.05); }
+
+  .flow-arrow {
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── HIGHLIGHT BOX ────────────────────────────── */
+  .highlight-box {
+    border-left: 3px solid;
+    padding: 1rem 1.25rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1.5rem 0;
+    background: var(--surface-alt);
+  }
+
+  .highlight-box.info   { border-color: var(--accent); }
+  .highlight-box.warn   { border-color: var(--dev); }
+  .highlight-box.blinq  { border-color: var(--stage); }
+
+  .highlight-box .box-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .highlight-box.info  .box-label { color: var(--accent); }
+  .highlight-box.warn  .box-label { color: var(--dev); }
+  .highlight-box.blinq .box-label { color: var(--stage); }
+
+  .highlight-box p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  /* ── KARGO CONCEPTS ──────────────────────────── */
+  .kargo-concepts {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .kargo-concept {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    background: var(--surface);
+  }
+
+  .kargo-concept-label {
+    padding: 1rem 1.25rem;
+    background: var(--surface-alt);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .kargo-concept-label strong {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .kargo-concept-label span {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+
+  .kargo-concept-body {
+    padding: 1rem 1.25rem;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .kargo-concept-body strong { color: var(--text); }
+
+  /* ── BLINQ PIPELINE VISUAL ───────────────────── */
+  .pipeline-visual {
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+
+  .pipeline-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 600px;
+  }
+
+  .p-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+    flex: 1;
+  }
+
+  .p-stage-header {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .p-stage.s-dev   .p-stage-header { color: var(--dev); }
+  .p-stage.s-stage .p-stage-header { color: var(--stage); }
+  .p-stage.s-prod  .p-stage-header { color: var(--prod); }
+
+  .p-boxes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 0 4px;
+  }
+
+  .p-box {
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .s-dev  .p-box { background: rgba(230,168,23,0.12);  color: var(--dev);   border: 1px solid rgba(230,168,23,0.25); }
+  .s-stage .p-box { background: rgba(45,212,191,0.10);  color: var(--stage); border: 1px solid rgba(45,212,191,0.25); }
+  .s-prod  .p-box { background: rgba(244,114,182,0.10); color: var(--prod);  border: 1px solid rgba(244,114,182,0.25); }
+
+  .p-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    color: var(--text-dim);
+    font-size: 16px;
+    margin-top: 24px;
+    flex-shrink: 0;
+  }
+
+  .p-policy {
+    font-family: var(--mono);
+    font-size: 10px;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .s-dev  .p-policy { background: rgba(230,168,23,0.12);  color: var(--dev);   }
+  .s-stage .p-policy { background: rgba(45,212,191,0.10);  color: var(--stage); }
+  .s-prod  .p-policy { background: rgba(244,114,182,0.10); color: var(--prod);  }
+
+  /* ── NUMBERS CALLOUT ──────────────────────────── */
+  .numbers-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .num-cell {
+    background: var(--surface);
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .num-big {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 600;
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .num-cell:nth-child(1) .num-big { color: var(--dev); }
+  .num-cell:nth-child(2) .num-big { color: var(--stage); }
+  .num-cell:nth-child(3) .num-big { color: var(--prod); }
+
+  .num-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── Q&A ─────────────────────────────────────── */
+  .qa-section {
+    margin-bottom: 4rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .qa-section h2 {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .qa-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .qa-intro {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    line-height: 1.7;
+  }
+
+  .qa-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .qa-question {
+    width: 100%;
+    background: var(--surface);
+    border: none;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    color: var(--text);
+    font-size: 14px;
+    font-family: var(--sans);
+    font-weight: 500;
+    line-height: 1.5;
+    transition: background 0.15s;
+  }
+
+  .qa-question:hover { background: var(--surface-alt); }
+
+  .qa-question:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .qa-q-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .qa-item.concept .qa-q-tag  { background: rgba(88,166,255,0.12);  color: var(--accent); border: 1px solid rgba(88,166,255,0.2); }
+  .qa-item.scenario .qa-q-tag { background: rgba(45,212,191,0.10);  color: var(--stage);  border: 1px solid rgba(45,212,191,0.2); }
+  .qa-item.tradeoff .qa-q-tag { background: rgba(230,168,23,0.12);  color: var(--dev);    border: 1px solid rgba(230,168,23,0.2); }
+  .qa-item.blinq    .qa-q-tag { background: rgba(244,114,182,0.10); color: var(--prod);   border: 1px solid rgba(244,114,182,0.2); }
+
+  .qa-chevron {
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .qa-answer {
+    display: none;
+    padding: 0 1.25rem 1.25rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  .qa-item.open .qa-answer { display: block; }
+  .qa-item.open .qa-chevron { transform: rotate(180deg); }
+
+  .qa-answer p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .qa-answer p:last-child { margin-bottom: 0; }
+
+  .qa-answer strong { color: var(--text); }
+
+  .qa-answer .answer-note {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(88,166,255,0.07);
+    border-left: 2px solid var(--accent);
+    padding: 0.6rem 0.85rem;
+    border-radius: 0 4px 4px 0;
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .qa-answer ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0.75rem 0;
+  }
+
+  .qa-answer ul li {
+    font-size: 14px;
+    color: var(--text-muted);
+    padding-left: 1.25rem;
+    position: relative;
+    line-height: 1.65;
+  }
+
+  .qa-answer ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 12px;
+    top: 1px;
+  }
+
+  /* ── STEP LIST ────────────────────────────────── */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 1.5rem 0;
+  }
+
+  .step {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.85rem 1.1rem;
+  }
+
+  .step-n {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    width: 24px;
+  }
+
+  .step-content strong {
+    font-size: 14px;
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .step-content span {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── SEPARATOR ────────────────────────────────── */
+  hr.sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 3rem 0;
+  }
+
+  /* ── RESPONSIVE ───────────────────────────────── */
+  @media (max-width: 800px) {
+    .shell { grid-template-columns: 1fr; }
+    nav { display: none; }
+    main { padding: 2rem 1.5rem; }
+    .numbers-row { grid-template-columns: 1fr; }
+    .compare { grid-template-columns: 1fr; }
+    .kargo-concept { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── SIDEBAR NAV ────────────────────────────── -->
+  <nav aria-label="Page navigation">
+    <div class="nav-brand">
+      <strong>GitOps Prep</strong>
+      Interview Guide
+    </div>
+    <div class="pipeline-track">
+      <div class="pipeline-line" aria-hidden="true"></div>
+      <div class="packet" aria-hidden="true"></div>
+
+      <a href="#gitops" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">GitOps<span>Core principles</span></span>
+      </a>
+      <a href="#argocd" class="nav-item dev">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">ArgoCD<span>Continuous delivery</span></span>
+      </a>
+      <a href="#kargo" class="nav-item stg">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Kargo<span>Progressive promotion</span></span>
+      </a>
+      <a href="#blinq" class="nav-item prd">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">At Blinq.IO<span>Real implementation</span></span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a href="#qa" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Mock Q&amp;A<span>Practice questions</span></span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── MAIN CONTENT ───────────────────────────── -->
+  <main>
+
+    <!-- HERO -->
+    <header class="hero">
+      <p class="hero-eyebrow">Interview Preparation · GitOps &amp; CD Pipeline</p>
+      <h1>Git is the<br>source of truth<span class="hero-cursor" aria-hidden="true"></span></h1>
+      <p class="hero-sub">
+        Everything you've built at Blinq.IO — the warehouses, the promotion pipeline, the ArgoCD app-of-apps — starts from one idea: the cluster should always match what's in git. Here's how to explain it.
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-ref">GitOps</span>
+        <span class="tag tag-dev">ArgoCD</span>
+        <span class="tag tag-stage">Kargo</span>
+        <span class="tag tag-prod">EKS · ECR · AWS</span>
+        <span class="tag tag-ref">Helm · GitHub Actions</span>
+      </div>
+    </header>
+
+    <!-- ── SECTION 1: GitOps ───────────────────── -->
+    <section class="section" id="gitops">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>What is GitOps?</h2>
+      </div>
+      <div class="section-body">
+        <p>GitOps is an operational framework where <strong>Git is the single source of truth</strong> for both application code and infrastructure configuration. Instead of running scripts or clicking buttons to deploy, you declare the desired state of your system in Git — and automated tooling reconciles the actual cluster state to match it continuously.</p>
+
+        <p>The term was coined by Weaveworks in 2017. The four principles from OpenGitOps are:</p>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Declarative</h4>
+            <p>You describe <em>what</em> you want, not <em>how</em> to get there. YAML files define the desired state. The system figures out the steps.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Versioned &amp; Immutable</h4>
+            <p>Desired state is stored in Git. Every change is a commit. You have full audit history, and rollback is just reverting a commit.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Pulled Automatically</h4>
+            <p>Software agents running inside the cluster pull the desired state from Git and apply it — the cluster reaches out, not the CI system.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Continuously Reconciled</h4>
+            <p>Agents constantly compare actual vs desired state and correct any drift — even if someone manually changed something in the cluster.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">Push-based vs Pull-based CD</h3>
+        <p>The key distinction GitOps introduces is <strong>pull-based deployment</strong>. Traditional CI/CD pipelines push changes — they reach into your cluster from outside. GitOps agents pull.</p>
+
+        <div class="compare">
+          <div class="compare-col push">
+            <h4>Push-based (Traditional CI/CD)</h4>
+            <ul>
+              <li>CI pipeline has kubectl/aws credentials</li>
+              <li>Deploy step runs from outside the cluster</li>
+              <li>Manual rollback requires re-running pipeline</li>
+              <li>Drift goes undetected unless re-triggered</li>
+              <li>Harder to audit: what's actually running?</li>
+            </ul>
+          </div>
+          <div class="compare-col pull">
+            <h4>Pull-based (GitOps)</h4>
+            <ul>
+              <li>Agent runs inside the cluster</li>
+              <li>No external system has cluster credentials</li>
+              <li>Rollback = revert the Git commit</li>
+              <li>Drift detected and auto-corrected continuously</li>
+              <li>Git history = complete deployment audit trail</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="highlight-box info">
+          <p class="box-label">One-liner for interviews</p>
+          <p>"GitOps means the cluster state always converges to what's in Git. Humans write YAML and push commits — the cluster reconciles itself. We stop SSHing into nodes and start writing pull requests."</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 2: ArgoCD ───────────────────── -->
+    <section class="section" id="argocd">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>ArgoCD</h2>
+      </div>
+      <div class="section-body">
+        <p>ArgoCD is a Kubernetes-native GitOps tool. It runs as a controller inside your cluster, watches a Git repository, and ensures your Kubernetes workloads always match the YAML stored there. Think of it as <strong>the reconciler</strong> — it's the engine that turns "Git commit" into "pods running in the cluster."</p>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Application</h4>
+            <p>The core ArgoCD object. Maps a Git path + revision to a cluster destination. Tracks sync status and health.</p>
+          </div>
+          <div class="concept-card">
+            <h4>AppProject</h4>
+            <p>RBAC boundary. Controls which repos, namespaces, and cluster-scoped resource kinds an Application is allowed to touch.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Sync Policy</h4>
+            <p>Automated or manual. Automated = any Git push triggers a sync. Manual = a human must click sync or run <code>argocd app sync</code>.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Self-Heal</h4>
+            <p>When enabled, ArgoCD reverts any manual changes to the cluster. Someone kubectl-edited a deployment? ArgoCD rewrites it from Git within seconds.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Health Checks</h4>
+            <p>ArgoCD knows how to check if a Deployment, Service, Ingress, etc. is actually healthy — not just created. Promotions wait on real health.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Sync Waves</h4>
+            <p>Ordering within a single sync. Resources with wave <code>-1</code> sync first, then <code>0</code>, then <code>1</code>. Used to install CRDs before workloads that need them.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">App of Apps Pattern</h3>
+        <p>Rather than manually applying each ArgoCD Application YAML, you create a <strong>single root Application</strong> that watches a directory of Application manifests. When ArgoCD syncs the root, it discovers and creates all child Applications. The cluster bootstraps itself from one command.</p>
+
+        <div class="flow">
+          <div class="flow-node ci-node">kubectl apply<br><small>root-application.yaml</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node">Root App<br><small>blinq-apps</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node dev-node">server-dev</div>
+          <span class="flow-arrow" style="color: transparent;">+</span>
+          <div class="flow-node stage-node">server-stage</div>
+          <span class="flow-arrow" style="color: transparent;">+</span>
+          <div class="flow-node prod-node">server-prod</div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <span class="lang-badge">yaml</span>
+            infra/argocd/root-application.yaml
+          </div>
+          <pre><span class="ky">apiVersion</span><span class="kv">: argoproj.io/v1alpha1</span>
+<span class="ky">kind</span><span class="kv">: Application</span>
+<span class="ky">metadata</span><span class="kv">:</span>
+  <span class="ky">name</span><span class="kv">: blinq-apps</span>
+  <span class="ky">namespace</span><span class="kv">: argocd</span>
+<span class="ky">spec</span><span class="kv">:</span>
+  <span class="ky">source</span><span class="kv">:</span>
+    <span class="ky">repoURL</span><span class="kv">: https://github.com/blinq-io/blinqV2.git</span>
+    <span class="ky">path</span><span class="kv">: infra/argocd/applications</span>  <span class="kc"># watches this dir recursively</span>
+    <span class="ky">targetRevision</span><span class="kv">: deploy-dev</span>
+    <span class="ky">directory</span><span class="kv">:</span>
+      <span class="ky">recurse</span><span class="kv">: true</span>
+  <span class="ky">destination</span><span class="kv">:</span>
+    <span class="ky">server</span><span class="kv">: https://kubernetes.default.svc</span>
+    <span class="ky">namespace</span><span class="kv">: argocd</span>
+  <span class="ky">syncPolicy</span><span class="kv">:</span>
+    <span class="ky">automated</span><span class="kv">:</span>
+      <span class="ky">prune</span><span class="kv">: true</span>     <span class="kc"># delete resources removed from git</span>
+      <span class="ky">selfHeal</span><span class="kv">: true</span>  <span class="kc"># revert manual kubectl edits</span></pre>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">Sync Waves — why order matters</h3>
+        <p>Some resources must exist before others. CRDs must be installed before resources of that type. An Ingress must have nginx running before it can receive traffic. Sync waves let you sequence within a single sync operation.</p>
+
+        <div class="step-list">
+          <div class="step">
+            <span class="step-n">-1</span>
+            <div class="step-content">
+              <strong>CRD installers</strong>
+              <span>External Secrets Operator, Reloader — must exist before workloads reference their custom resources</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">0</span>
+            <div class="step-content">
+              <strong>Core infrastructure</strong>
+              <span>Kargo, ingress-nginx, all workload Applications — the main cluster services</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">1</span>
+            <div class="step-content">
+              <strong>Cluster-level config</strong>
+              <span>ClusterIssuer (cert-manager) — requires cert-manager CRDs from wave 0</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">2</span>
+            <div class="step-content">
+              <strong>Ingress &amp; TLS</strong>
+              <span>Ingress objects + TLS certificates — requires nginx healthy from wave 0. Without this ordering, ArgoCD blocks indefinitely waiting for Ingress health.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight-box warn">
+          <p class="box-label">Common gotcha</p>
+          <p>An ArgoCD Application watches a <em>branch</em>, not a tag. If you push a GitOps commit to the wrong branch, ArgoCD never sees it and the cluster doesn't update. We had a case where the workflow committed to <code>dev</code> instead of <code>deploy-dev</code> — the app appeared healthy but was running an old image.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 3: Kargo ────────────────────── -->
+    <section class="section" id="kargo">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>Kargo</h2>
+      </div>
+      <div class="section-body">
+        <p>ArgoCD solves <em>continuous delivery</em> — keeping a cluster in sync with Git. But it doesn't answer: <strong>how does a new image get promoted from dev to staging to production?</strong> That gap is what Kargo fills.</p>
+
+        <p>Kargo is a <strong>continuous promotion platform</strong> for Kubernetes. Built by Akuity (the company behind Argo), it sits on top of ArgoCD and manages the lifecycle of deployable artifacts — tracking what's available, what's been verified, and what should move to the next environment.</p>
+
+        <div class="kargo-concepts">
+          <div class="kargo-concept">
+            <div class="kargo-concept-label">
+              <strong>Warehouse</strong>
+              <span>source of truth</span>
+            </div>
+            <div class="kargo-concept-body">
+              Watches an artifact source — an ECR repository or a Git branch — and creates <strong>Freight</strong> whenever something new appears. A Warehouse for <code>blinq-server</code> polls ECR every minute; when a new <code>sha-abc123</code> tag appears, it wraps that in a Freight object.
+            </div>
+          </div>
+          <div class="kargo-concept">
+            <div class="kargo-concept-label">
+              <strong>Freight</strong>
+              <span>the artifact bundle</span>
+            </div>
+            <div class="kargo-concept-body">
+              An immutable record of a specific artifact at a specific version. A Freight bundles one or more image tags (or git commits) together. It travels through Stages on its way to production, accumulating verification status at each stop. <strong>You promote Freight, not images directly.</strong>
+            </div>
+          </div>
+          <div class="kargo-concept">
+            <div class="kargo-concept-label">
+              <strong>Stage</strong>
+              <span>the environment</span>
+            </div>
+            <div class="kargo-concept-body">
+              Represents an environment (dev, stage, prod) and a <strong>promotion template</strong> — a series of steps: clone the repo, update YAML, commit, push, then signal ArgoCD to sync. A Stage declares which Warehouses (or upstream Stages) it accepts Freight from.
+            </div>
+          </div>
+          <div class="kargo-concept">
+            <div class="kargo-concept-label">
+              <strong>Promotion</strong>
+              <span>the action</span>
+            </div>
+            <div class="kargo-concept-body">
+              A single run of a Stage's promotion template for a specific Freight. Kargo records the outcome, which steps ran, what git commits were made. A promotion either succeeds (Freight is now on that Stage) or fails with a full log.
+            </div>
+          </div>
+          <div class="kargo-concept">
+            <div class="kargo-concept-label">
+              <strong>ProjectConfig</strong>
+              <span>promotion policy</span>
+            </div>
+            <div class="kargo-concept-body">
+              Controls whether a Stage auto-promotes from its upstream source, or requires a human to click "promote" in the Kargo UI. Dev stages run <code>autoPromotionEnabled: true</code>. Stage and prod require manual approval.
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">How Kargo actually works — step by step</h3>
+
+        <div class="step-list">
+          <div class="step">
+            <span class="step-n">01</span>
+            <div class="step-content">
+              <strong>CI builds and pushes image</strong>
+              <span>GitHub Actions builds <code>blinq-server:sha-abc123def456</code> and pushes to ECR. CI is done — it doesn't touch the cluster.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">02</span>
+            <div class="step-content">
+              <strong>Warehouse detects the new tag</strong>
+              <span>Kargo polls ECR every minute. It sees <code>sha-abc123def456</code> matches the <code>^sha-</code> regex, creates a Freight object.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">03</span>
+            <div class="step-content">
+              <strong>dev-apps Stage auto-promotes</strong>
+              <span>Because <code>autoPromotionEnabled: true</code>, the Stage immediately starts its promotion template: clones <code>deploy-dev</code>, updates <code>values-dev.yaml</code> with the new tag, commits, pushes.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">04</span>
+            <div class="step-content">
+              <strong>ArgoCD syncs the cluster</strong>
+              <span>Kargo's <code>argocd-update</code> step waits for ArgoCD to detect the git change and report the Application healthy. If it stays degraded, the promotion fails with the ArgoCD error.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">05</span>
+            <div class="step-content">
+              <strong>Freight is now "on dev"</strong>
+              <span>Kargo marks this Freight as having been verified on <code>dev-apps</code>. It becomes available as a candidate for <code>stage-blinq-server</code> to promote from.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">06</span>
+            <div class="step-content">
+              <strong>Human promotes to stage (manual)</strong>
+              <span>An engineer opens the Kargo UI at <code>promote.blinq.io</code>, selects the Freight, clicks Promote. The stage template runs: copy image to stage ECR, update <code>values-stage.yaml</code>, push to <code>deploy-stage</code>, sync ArgoCD.</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">Promotion template steps</h3>
+        <p>Each Stage defines its own sequence. These are the built-in step types Kargo provides:</p>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>git-clone</h4>
+            <p>Clones a specific branch of the repo into a working directory. Always the first step.</p>
+          </div>
+          <div class="concept-card">
+            <h4>yaml-update</h4>
+            <p>Updates a key in a YAML file using a Kargo expression like <code>${{ imageFrom("...").Tag }}</code>. No templating engine needed.</p>
+          </div>
+          <div class="concept-card">
+            <h4>git-commit</h4>
+            <p>Commits the changes. The commit message is configurable — ours say <code>chore(gitops): promote blinq-server to stage</code>.</p>
+          </div>
+          <div class="concept-card">
+            <h4>git-push</h4>
+            <p>Pushes to the target branch. In our setup: <code>deploy-dev</code>, <code>deploy-stage</code>, or <code>deploy-prod</code>.</p>
+          </div>
+          <div class="concept-card">
+            <h4>argocd-update</h4>
+            <p>Tells ArgoCD to sync a named Application and waits until it reports Healthy. This is the gate — promotion only succeeds if the cluster actually comes up.</p>
+          </div>
+          <div class="concept-card">
+            <h4>http</h4>
+            <p>Generic HTTP step — used to dispatch GitHub Actions workflows (ECR copy, BVT tests) and send Slack alerts on failure.</p>
+          </div>
+        </div>
+
+        <div class="highlight-box info">
+          <p class="box-label">ArgoCD vs Kargo — the short version</p>
+          <p><strong>ArgoCD</strong> makes sure the cluster matches what's in a Git branch. It's stateless — it just reconciles. <strong>Kargo</strong> manages the flow of specific artifact versions through your environments. It tracks which image version is on which environment, controls who can promote what, and makes promotion an auditable, repeatable action rather than a manual git edit.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 4: At Blinq.IO ─────────────── -->
+    <section class="section" id="blinq">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>At Blinq.IO</h2>
+      </div>
+      <div class="section-body">
+        <p>Here's the actual setup you built and operate. Use these numbers and specifics when answering interview questions — they make vague answers concrete.</p>
+
+        <div class="numbers-row">
+          <div class="num-cell">
+            <span class="num-big">11</span>
+            <span class="num-label">ECR Warehouses<br>monitoring image tags</span>
+          </div>
+          <div class="num-cell">
+            <span class="num-big">14</span>
+            <span class="num-label">Kargo Stages across<br>dev / stage / prod</span>
+          </div>
+          <div class="num-cell">
+            <span class="num-big">50%</span>
+            <span class="num-label">AWS cost reduction<br>$16K → $8K / month</span>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">The promotion pipeline</h3>
+        <p>Images flow through three environment tiers. Dev auto-promotes on every CI build; stage and prod require human approval in the Kargo UI at <code>promote.blinq.io</code>.</p>
+
+        <div class="pipeline-visual">
+          <div class="pipeline-row">
+            <div class="p-stage s-dev">
+              <div class="p-stage-header">Dev</div>
+              <div class="p-boxes">
+                <div class="p-box">dev-apps</div>
+                <div class="p-box">dev-workers</div>
+                <div class="p-box">dev-frontend</div>
+              </div>
+              <span class="p-policy">auto-promote</span>
+            </div>
+            <div class="p-arrow">→</div>
+            <div class="p-stage s-stage">
+              <div class="p-stage-header">Stage</div>
+              <div class="p-boxes">
+                <div class="p-box">stage-blinq-server</div>
+                <div class="p-box">stage-ai-server</div>
+                <div class="p-box">stage-orchestrator</div>
+                <div class="p-box">stage-logs-service</div>
+                <div class="p-box">stage-exec-planner</div>
+                <div class="p-box">stage-workers</div>
+                <div class="p-box">stage-frontend</div>
+              </div>
+              <span class="p-policy">manual</span>
+            </div>
+            <div class="p-arrow">→</div>
+            <div class="p-stage s-prod">
+              <div class="p-stage-header">Prod</div>
+              <div class="p-boxes">
+                <div class="p-box">prod-blinq-server</div>
+                <div class="p-box">prod-ai-server</div>
+                <div class="p-box">prod-orchestrator</div>
+                <div class="p-box">prod-logs-service</div>
+                <div class="p-box">prod-exec-planner</div>
+                <div class="p-box">prod-workers</div>
+              </div>
+              <span class="p-policy">manual</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">Per-service independent promotion</h3>
+        <p>A key design decision: <strong>each service has its own Warehouse and its own stage-level Stage</strong>. You can promote just <code>ai-server</code> to stage without touching <code>blinq-server</code>. This matters in practice — a hotfix for one service shouldn't force you to promote an unrelated service that may not be stage-ready.</p>
+
+        <div class="highlight-box blinq">
+          <p class="box-label">Design decision to explain</p>
+          <p>The 5 execution-planner services (<code>executions-service</code>, <code>execution-manager</code>, <code>execution-thread-manager</code>, <code>outbox-poller</code>, <code>execution-worker</code>) share a single values file, so they're in one combined Stage. If they had separate Stages, two Kargo promotions running simultaneously would both try to commit to the same file and create a git conflict. One Stage, one commit = no race conditions.</p>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">ECR image copying</h3>
+        <p>The dev and prod clusters use separate ECR accounts. A promotion to stage doesn't just update the values file — it first dispatches a <code>ecr-copy-images.yml</code> GitHub Actions workflow that copies the <code>sha-*</code> image tag from the dev ECR to the stage or prod ECR. Only then does Kargo update the Helm values and push to the deploy branch.</p>
+
+        <div class="flow">
+          <div class="flow-node ci-node">Kargo http step</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node">GH Actions<br><small>ecr-copy-images.yml</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node stage-node">Stage ECR<br><small>blinq-server:sha-abc</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node">yaml-update<br><small>values-stage.yaml</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node stage-node">ArgoCD sync<br><small>main-server-stage</small></div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">Full stack: what Kargo integrates with</h3>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>GitHub Actions</h4>
+            <p>CI builds images, runs tests. On push to <code>dev</code>, builds all service images tagged <code>sha-{12-char-commit}</code> and pushes to ECR. Kargo takes over from there.</p>
+          </div>
+          <div class="concept-card">
+            <h4>AWS ECR</h4>
+            <p>Container image registry. Kargo uses IRSA (IAM Roles for Service Accounts) to authenticate the <code>kargo-controller</code> ServiceAccount for polling image tags.</p>
+          </div>
+          <div class="concept-card">
+            <h4>ArgoCD</h4>
+            <p>Kargo's <code>argocd-update</code> step calls the ArgoCD API to trigger a sync and poll until the Application reports <code>Healthy</code>. Kargo doesn't deploy — ArgoCD does.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Helm</h4>
+            <p>ArgoCD Applications use the Helm chart in the repo. Kargo updates the <code>image.tag</code> key in the per-environment values file. ArgoCD renders the chart with those values and applies the result.</p>
+          </div>
+          <div class="concept-card">
+            <h4>External Secrets</h4>
+            <p>Secrets aren't in Git. ESO pulls them from AWS Secrets Manager into Kubernetes Secrets. Combined with Reloader, a secret rotation in AWS triggers a rolling restart automatically.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Slack</h4>
+            <p>Each Stage has an <code>http</code> step that fires on failure and posts to <code>#deployments</code> with the promotion name and which step failed — ArgoCD sync error vs pre-deploy step.</p>
+          </div>
+        </div>
+
+        <h3 style="font-family: var(--mono); font-size: 1rem; color: var(--text); margin: 2rem 0 1rem;">Deploy branches — why separate from main</h3>
+        <p>ArgoCD watches <code>deploy-dev</code>, <code>deploy-stage</code>, and <code>deploy-prod</code> — not <code>dev</code>/<code>main</code>. The deploy branches contain only infrastructure state (Helm values files, Kargo state files). Kargo commits to them. Application code lives on <code>dev</code>/<code>main</code>. This separation means a broken application commit can't accidentally push broken infra config into a deploy branch, and vice versa.</p>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <span class="lang-badge">yaml</span>
+            infra/kargo/warehouse.yaml — blinq-server Warehouse
+          </div>
+          <pre><span class="ky">apiVersion</span><span class="kv">: kargo.akuity.io/v1alpha1</span>
+<span class="ky">kind</span><span class="kv">: Warehouse</span>
+<span class="ky">metadata</span><span class="kv">:</span>
+  <span class="ky">name</span><span class="kv">: blinq-server-image</span>
+  <span class="ky">namespace</span><span class="kv">: blinq</span>
+<span class="ky">spec</span><span class="kv">:</span>
+  <span class="ky">interval</span><span class="kv">: 1m</span>         <span class="kc"># poll ECR every minute</span>
+  <span class="ky">subscriptions</span><span class="kv">:</span>
+    <span class="ky">- image</span><span class="kv">:</span>
+        <span class="ky">repoURL</span><span class="kv">: 132334799376.dkr.ecr.eu-north-1.amazonaws.com/blinq-server</span>
+        <span class="ky">imageSelectionStrategy</span><span class="kv">: NewestBuild</span>
+        <span class="ky">discoveryLimit</span><span class="kv">: 20</span>
+        <span class="ky">allowTagsRegexes</span><span class="kv">:</span>
+          <span class="ka">- "^sha-"</span>       <span class="kc"># only track immutable sha-* tags, not mutable :latest</span></pre>
+        </div>
+
+        <div class="highlight-box warn">
+          <p class="box-label">Real incident to know</p>
+          <p>Recorder session pods kept failing with <code>ImagePullBackOff</code> on stage because the <code>cloud-worker</code> and <code>selkies-harness</code> images were never promoted from <code>dev-workers</code> to <code>stage-workers</code>. The app services were deployed — but the worker images they reference at runtime were still pointing at dev ECR tags that didn't exist in stage ECR. <strong>App promotions and worker promotions are independent. Always promote workers before (or with) app servers when a session feature changes.</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── MOCK Q&A ────────────────────────────── -->
+    <section class="qa-section" id="qa">
+      <span class="qa-eyebrow">Practice</span>
+      <h2>Mock Interview Q&amp;A</h2>
+      <p class="qa-intro">These are real questions you should be able to answer cold. Click to reveal a strong answer — read it once, then close it and try to say it in your own words. The goal is internalization, not memorization.</p>
+
+      <!-- CONCEPT QUESTIONS -->
+      <div class="qa-item concept" role="region">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Explain GitOps to me like I've never heard of it.</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Imagine you have a Google Doc that describes exactly how your kitchen should look — which appliances are plugged in, where everything sits. Now imagine a robot whose only job is to read that doc and make your physical kitchen match it, constantly. If you move the toaster, the robot moves it back. If you update the doc to say "add a coffee machine," the robot adds one.</p>
+          <p>GitOps is that system for software infrastructure. The "doc" is your Git repository. The "robot" is a tool like ArgoCD running inside your Kubernetes cluster. Whenever you want to change something — update an environment variable, scale up a service, deploy a new version — you edit a file in Git and push a commit. The robot detects the change and makes your cluster match. No one logs into servers. No one runs scripts. The cluster converges to whatever is in Git.</p>
+          <div class="answer-note">Follow-up they might ask: "What if someone manually changes something in the cluster?" → Self-heal detects the drift and reverts it. The cluster always goes back to Git state.</div>
+        </div>
+      </div>
+
+      <div class="qa-item concept">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What's the difference between push-based and pull-based CD? Which does GitOps use and why?</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p><strong>Push-based</strong>: Your CI pipeline (Jenkins, GitHub Actions) has credentials to your cluster. When tests pass, it runs kubectl or helm to apply changes. The change is "pushed" from outside the cluster.</p>
+          <p><strong>Pull-based</strong>: An agent runs <em>inside</em> the cluster. It watches Git. When it sees a change, it pulls the new desired state and applies it from within the cluster. No external system needs cluster credentials.</p>
+          <p>GitOps uses <strong>pull-based</strong>. The security advantage is significant: you don't have to give your CI system admin access to your cluster. The auditability advantage is also real — the agent continuously reconciles, so drift gets caught immediately rather than only when the next CI run happens.</p>
+          <div class="answer-note">Personal context: "At Blinq.IO, CI builds and tags the image, pushes to ECR, and stops. Kargo and ArgoCD take over from there. The cluster credentials never leave the cluster."</div>
+        </div>
+      </div>
+
+      <div class="qa-item concept">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What is ArgoCD and what problem does it solve?</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>ArgoCD is a Kubernetes-native GitOps tool. It's a controller that runs inside your cluster and continuously watches a Git repository. When the desired state in Git diverges from the actual state in the cluster, ArgoCD corrects the cluster.</p>
+          <p>The problem it solves: without it, "what's actually running in my cluster right now?" is a hard question. You'd have to check deployment logs, ask who ran what script, and hope nothing drifted. With ArgoCD, the answer is always "whatever is in this Git branch, applied with this Helm chart." It makes the cluster auditable and reproducible.</p>
+          <ul>
+            <li>Sync status: Synced / OutOfSync — is the cluster matching Git?</li>
+            <li>Health status: Healthy / Degraded — are the workloads actually running?</li>
+            <li>Self-heal: reverts manual cluster edits back to Git state</li>
+            <li>Multi-source: combine a shared Helm chart with per-environment values files</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qa-item concept">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What is Kargo and how is it different from ArgoCD?</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>They solve adjacent but distinct problems. <strong>ArgoCD</strong> is a delivery tool — given a Git branch, make the cluster match it. It's stateless about <em>which version</em> of an image is on which environment.</p>
+          <p><strong>Kargo</strong> is a promotion tool — it tracks specific artifact versions (called Freight) as they move through environments. It knows that <code>blinq-server:sha-abc123</code> is on dev, has been there for 2 hours, and is a candidate to be promoted to staging. ArgoCD doesn't know or care about that.</p>
+          <p>Think of it this way: ArgoCD reads Git and applies it to the cluster. Kargo decides what gets written to Git in the first place — it's the controller that manages the lifecycle of artifact promotion. They work together: Kargo edits the Helm values files and pushes to the deploy branch; ArgoCD sees the change and syncs the cluster.</p>
+          <div class="answer-note">One-liner: "ArgoCD is the executor — it applies what's in Git. Kargo is the gatekeeper — it controls what gets into Git in the first place."</div>
+        </div>
+      </div>
+
+      <!-- SCENARIO QUESTIONS -->
+      <div class="qa-item scenario">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Walk me through what happens from a developer pushing code to production being updated.</span>
+          <span class="qa-q-tag">scenario</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>At Blinq.IO, the flow is fully automated through dev and manual from staging onward:</p>
+          <ul>
+            <li>Developer merges a PR to the <code>dev</code> branch. GitHub Actions triggers <code>app-images.yml</code>.</li>
+            <li>The workflow builds all service images with Docker Bake, tags them <code>sha-{first 12 chars of commit SHA}</code>, and pushes to ECR.</li>
+            <li>Kargo's <code>blinq-server-image</code> Warehouse polls ECR, detects the new tag, creates a Freight object.</li>
+            <li>The <code>dev-apps</code> Stage has auto-promotion enabled — it immediately starts its promotion template. Clones <code>deploy-dev</code>, updates <code>image.tag</code> in <code>values-dev.yaml</code> using the Kargo expression <code>${{ imageFrom("...").Tag }}</code>, commits, pushes.</li>
+            <li>ArgoCD sees the new commit on <code>deploy-dev</code>, syncs the <code>main-server-dev</code> Application, rolls out new pods. Kargo waits for healthy confirmation.</li>
+            <li>For staging: an engineer opens <code>promote.blinq.io</code>, selects the Freight, clicks Promote. Kargo runs the stage template: copies the image to stage ECR, updates <code>values-stage.yaml</code>, pushes to <code>deploy-stage</code>, waits for ArgoCD. After that, it dispatches BVT tests via GitHub Actions.</li>
+            <li>For production: same manual process, but targets <code>deploy-prod</code> and the prod ArgoCD cluster.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="qa-item scenario">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>A pod is stuck in ImagePullBackOff after a deployment. How do you debug it?</span>
+          <span class="qa-q-tag">scenario</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>I work through it layer by layer:</p>
+          <ul>
+            <li><code>kubectl describe pod &lt;name&gt; -n dev</code> — get the exact error. Is it "not found," "unauthorized," or "manifest unknown"?</li>
+            <li>Check if the image tag actually exists in ECR: <code>aws ecr describe-images --repository-name blinq-server --region eu-north-1 --query 'imageDetails[*].imageTags[]'</code>. If it's not there, CI didn't finish — maybe the paths filter skipped the workflow because only infra files changed.</li>
+            <li>Check what tag ArgoCD is trying to deploy: <code>kubectl get deploy main-service -n dev -o jsonpath='{.spec.template.spec.containers[0].image}'</code></li>
+            <li>Compare to what's in the values file: <code>grep "tag:" infra/helm/charts/server/values-dev.yaml</code></li>
+            <li>If the tag in the values file doesn't match ECR, either the Kargo promotion didn't run, or the image reference in ECR used a different SHA format. Check recent ArgoCD sync and Kargo promotion history.</li>
+            <li>If the tag exists but pull fails with 401: the node IAM role is missing ECR permissions. Check the IRSA annotation on the node or the EC2 instance profile.</li>
+          </ul>
+          <div class="answer-note">We've seen: CI skipped because only infra/ changed (paths filter), worker images not promoted to stage ECR, and wrong tag format from SHA truncation differences.</div>
+        </div>
+      </div>
+
+      <div class="qa-item scenario">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>ArgoCD shows an application as OutOfSync and it's not fixing itself. What do you do?</span>
+          <span class="qa-q-tag">scenario</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>First, I distinguish between OutOfSync (cluster differs from Git) and a sync <em>failure</em> (ArgoCD tried to sync and got an error). They look similar but need different fixes.</p>
+          <ul>
+            <li>Run <code>argocd app get &lt;app-name&gt;</code> or <code>kubectl describe application &lt;name&gt; -n argocd</code> to see the condition message.</li>
+            <li>If the target namespace doesn't exist: <code>kubectl create namespace &lt;ns&gt;</code>. ArgoCD's <code>CreateNamespace=true</code> should handle this, but the AppProject must include the namespace in destinations.</li>
+            <li>If a CRD is missing (ExternalSecret, etc.): either the CRD installer app hasn't synced yet (check sync waves), or the feature isn't supported — disable it in values.</li>
+            <li>If the AppProject is blocking: the namespace or repo isn't listed in the Project's destinations or sourceRepos. We hit this when adding the <code>kargo</code> namespace — had to add it to <code>infra/argocd/projects/blinq.yaml</code> and force-sync the root app.</li>
+            <li>Force sync manually: <code>argocd app sync &lt;app-name&gt; --insecure</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- TRADEOFF QUESTIONS -->
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Why use separate deploy branches instead of just watching the main dev branch?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>The core reason: <strong>separation of concerns between application commits and deployment state</strong>. When Kargo writes <code>image.tag: sha-abc123</code> into a values file and commits, that commit should not be mixed with application code changes. If you watch <code>dev</code> directly, every code commit that happens to not change an image could still trigger an ArgoCD sync. More critically, a broken app commit that fails CI could leave the deploy branch in a half-baked state.</p>
+          <p>With separate deploy branches, only Kargo writes to them. The commit history is clean — every commit is exactly "promote X to Y at time T." You can read the entire deployment history from <code>git log deploy-stage</code> without noise from code changes.</p>
+          <p>It also gives you an emergency lever: push directly to <code>deploy-prod</code> with a hotfix values change and bypass the normal promotion flow if needed. That's not possible if the deploy branch is the same as your code branch.</p>
+        </div>
+      </div>
+
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Why give each service its own Warehouse and stage-level promotion Stage?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>The alternative — one combined "promote all services together" stage — sounds simpler but creates coupling. If <code>ai-server</code> has a bug and fails staging validation, you can't promote <code>blinq-server</code> until that's fixed. One bad service blocks everything.</p>
+          <p>With per-service stages, you promote independently. A hotfix to <code>orchestrator-server</code> goes through its own promotion path. A risky AI feature can sit on dev while the core server gets promoted. It also means the blast radius of a failed promotion is limited to one service's stage, not the entire environment.</p>
+          <p>The one exception: the 5 execution-planner services share a single stage because they write to the same <code>values-stage.yaml</code>. If they had separate stages, two promotions running simultaneously would cause a git push conflict on that file. The constraint came from the data model, not the principle.</p>
+        </div>
+      </div>
+
+      <!-- BLINQ-SPECIFIC QUESTIONS -->
+      <div class="qa-item blinq">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>How did GitOps help with your cost reduction from $16K to $8K?</span>
+          <span class="qa-q-tag">blinq specific</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>GitOps enabled the cost work in a few ways — it's the foundation that made the other optimizations safe to do:</p>
+          <ul>
+            <li><strong>EKS consolidation</strong>: We merged dev and staging workloads into a shared cluster with namespace isolation. This was only safe because ArgoCD enforced AppProject boundaries — dev applications literally cannot touch stage namespaces. Without that isolation guarantee in code, merging environments feels risky.</li>
+            <li><strong>Workload rightsizing</strong>: Resource requests in Helm values files. Because all resource configs live in Git with a review history, I could safely reduce requests, see the diff clearly, and revert instantly if something went wrong.</li>
+            <li><strong>Karpenter autoscaling</strong>: Replaced fixed node groups. Karpenter itself is deployed and configured via ArgoCD — any node pool change goes through Git review, not a manual EC2 console change.</li>
+            <li><strong>Spot instances</strong>: Added Spot instance support to node pools in the Karpenter configs in Git. The change is auditable and reversible.</li>
+          </ul>
+          <p>The broader point: GitOps made infrastructure changes low-risk. When a cost optimization meant changing resource allocation, I could experiment, observe, and revert confidently. That confidence let me be more aggressive with the optimizations.</p>
+        </div>
+      </div>
+
+      <div class="qa-item blinq">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>How do secrets work in your GitOps setup — you can't store them in Git?</span>
+          <span class="qa-q-tag">blinq specific</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Correct — we never store secret values in Git. The pattern is: <strong>External Secrets Operator (ESO) + AWS Secrets Manager + Reloader</strong>.</p>
+          <ul>
+            <li>Secrets like <code>MONGO_URI</code>, <code>STRIPE_SECRET_KEY</code> live in AWS Secrets Manager as JSON blobs at paths like <code>blinqV2/prod/main-service/env</code>.</li>
+            <li>ESO, deployed via ArgoCD, runs a <code>ClusterSecretStore</code> that authenticates to Secrets Manager using IRSA — the <code>external-secrets</code> ServiceAccount has an IAM role with read-only access to those paths.</li>
+            <li>An <code>ExternalSecret</code> resource (in the Helm chart) tells ESO which keys to pull and what Kubernetes Secret to create from them. This ExternalSecret definition <em>is</em> in Git — just the key names, not the values.</li>
+            <li>Stakater Reloader watches Kubernetes Secrets. When ESO syncs a new value from Secrets Manager, Reloader detects the hash change and triggers a rolling restart of the Deployment that references it.</li>
+          </ul>
+          <p>So the full rotation flow: update a secret in AWS Secrets Manager → ESO syncs within 1h (or force with an annotation) → Reloader restarts the pod → new pod picks up the new value. Zero manual kubectl operations.</p>
+          <div class="answer-note">Gotcha to mention: ESO v0.10+ removed the v1beta1 API. Everything must use <code>apiVersion: external-secrets.io/v1</code>. We hit this upgrading ESO and had to update all our ExternalSecret and ClusterSecretStore manifests.</div>
+        </div>
+      </div>
+
+      <div class="qa-item blinq">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What's something that went wrong with this GitOps setup and how did you fix it?</span>
+          <span class="qa-q-tag">blinq specific</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>A few real ones worth having ready:</p>
+          <ul>
+            <li><strong>Cert-manager HTTP-01 timeout on AWS NLB</strong>: When setting up prod, HTTPS certificate issuance kept timing out. The issue was that AWS NLBs have a "hairpin" problem — cert-manager, running inside the VPC, can't reach the NLB's external IP to perform its own self-check. Switching from HTTP-01 to DNS-01 challenge (using Cloudflare's API) fixed it completely.</li>
+            <li><strong>Reloader not restarting pods</strong>: Secrets were rotating in Secrets Manager but pods weren't picking up the new values. The issue was <code>watchGlobally: false</code> in Reloader's Helm values. That flag restricts Reloader to watching secrets in <code>kube-system</code> only. Our app secrets are in <code>prod</code>. Setting <code>watchGlobally: true</code> fixed it.</li>
+            <li><strong>ArgoCD OutOfSync on ExternalSecret</strong>: ArgoCD kept showing ExternalSecret resources as out-of-sync even after a successful sync. ESO's admission webhook was injecting <code>conversionStrategy: Default</code>, <code>decodingStrategy: None</code>, and <code>metadataPolicy: None</code> into live resources. Since these weren't in our Helm template, ArgoCD always saw a diff. Adding them explicitly to the template resolved the permanent drift.</li>
+          </ul>
+          <div class="answer-note">Pick one of these and tell the full story — what you observed, what you diagnosed, what you changed, and what you learned. Showing your debugging process is more valuable than the fix itself.</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function toggle(btn) {
+    const item = btn.closest('.qa-item');
+    const answer = item.querySelector('.qa-answer');
+    const isOpen = item.classList.contains('open');
+    item.classList.toggle('open', !isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
+    answer.hidden = isOpen;
+  }
+</script>
+
+</body>
+</html>
+
+</body></html>
