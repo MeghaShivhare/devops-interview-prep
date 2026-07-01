@@ -131,15 +131,14 @@ main{padding:2.5rem 3rem 5rem;max-width:940px}
     <input type="text" id="searchInput" placeholder="Search questions…">
   </div>
   <a href="#k8s"        class="nav-link"><span class="nav-dot" style="background:var(--blue)"></span>Kubernetes &amp; EKS<span class="nav-count">19</span></a>
-  <a href="#docker"     class="nav-link"><span class="nav-dot" style="background:var(--teal)"></span>Docker &amp; Containers<span class="nav-count">9</span></a>
-  <a href="#aws"        class="nav-link"><span class="nav-dot" style="background:var(--orange)"></span>AWS Services<span class="nav-count">16</span></a>
+  <a href="#docker"     class="nav-link"><span class="nav-dot" style="background:var(--teal)"></span>Docker &amp; Containers<span class="nav-count">10</span></a>
+  <a href="#aws"        class="nav-link"><span class="nav-dot" style="background:var(--orange)"></span>AWS Services<span class="nav-count">17</span></a>
   <a href="#net"        class="nav-link"><span class="nav-dot" style="background:var(--purple)"></span>Networking &amp; DNS<span class="nav-count">6</span></a>
   <a href="#cicd"       class="nav-link"><span class="nav-dot" style="background:var(--green)"></span>CI/CD &amp; Deployments<span class="nav-count">5</span></a>
   <a href="#obs"        class="nav-link"><span class="nav-dot" style="background:var(--pink)"></span>Monitoring &amp; SRE<span class="nav-count">6</span></a>
   <a href="#iac"        class="nav-link"><span class="nav-dot" style="background:var(--emerald)"></span>Terraform &amp; IaC<span class="nav-count">3</span></a>
   <a href="#security"   class="nav-link"><span class="nav-dot" style="background:var(--amber)"></span>Security &amp; IAM<span class="nav-count">3</span></a>
   <a href="#linux"      class="nav-link"><span class="nav-dot" style="background:var(--slate)"></span>Linux &amp; Systems<span class="nav-count">4</span></a>
-  <a href="#behavioral" class="nav-link"><span class="nav-dot" style="background:var(--lavender)"></span>Behavioral<span class="nav-count">3</span></a>
 </nav>
 
 <!-- ── MAIN ─────────────────────────────────── -->
@@ -148,10 +147,10 @@ main{padding:2.5rem 3rem 5rem;max-width:940px}
 <header class="hero">
   <p class="eyebrow">DevOps Interview Preparation</p>
   <h1>Most Asked Interview Questions</h1>
-  <p>Real questions from real interviews — Kubernetes, Docker, AWS, CI/CD, Terraform, monitoring, Linux, and behavioral. Answers are concise and interview-ready.</p>
+  <p>Real questions from real interviews — Kubernetes, Docker, AWS, CI/CD, Terraform, monitoring, Linux, and more. Answers are concise and interview-ready.</p>
   <div class="stats">
     <div><span class="stat-num">60+</span><span class="stat-lbl">Questions</span></div>
-    <div><span class="stat-num">10</span><span class="stat-lbl">Categories</span></div>
+    <div><span class="stat-num">9</span><span class="stat-lbl">Categories</span></div>
     <div><span class="stat-num">3</span><span class="stat-lbl">Difficulty levels</span></div>
   </div>
 </header>
@@ -428,7 +427,7 @@ kubectl exec -it &lt;pod&gt; -- /bin/sh       # shell into pod</pre></div>
   <div class="cat-hdr">
     <span class="cat-dot" style="background:var(--teal)"></span>
     <span class="cat-title">Docker &amp; Containers</span>
-    <span class="cat-n">9 questions</span>
+    <span class="cat-n">10 questions</span>
   </div>
 
   <details class="qa">
@@ -557,6 +556,20 @@ docker cp ./config.yaml container_name:/app/config/config.yaml   # host → cont
     </div>
   </details>
 
+  <details class="qa">
+    <summary><span class="q-text">How do you list Docker images?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <div class="cb"><div class="cb-hdr">docker image commands</div><pre>docker images                         # list all local images (REPOSITORY, TAG, IMAGE ID, SIZE)
+docker images -a                      # include intermediate images
+docker images --filter "dangling=true" # untagged (dangling) images
+docker image ls                       # same as docker images
+docker image inspect nginx:latest     # full metadata of a specific image
+docker rmi image-id                   # remove an image
+docker image prune                    # remove all dangling images
+docker image prune -a                 # remove all unused images</pre></div>
+    </div>
+  </details>
+
 </section>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -566,7 +579,7 @@ docker cp ./config.yaml container_name:/app/config/config.yaml   # host → cont
   <div class="cat-hdr">
     <span class="cat-dot" style="background:var(--orange)"></span>
     <span class="cat-title">AWS Services</span>
-    <span class="cat-n">16 questions</span>
+    <span class="cat-n">17 questions</span>
   </div>
 
   <details class="qa">
@@ -1077,6 +1090,16 @@ docker cp ./config.yaml container_name:/app/config/config.yaml   # host → cont
     </div>
   </details>
 
+  <details class="qa">
+    <summary><span class="q-text">AWS Backup — what is it and when do you use it?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Centralized, policy-driven backup service for AWS resources. Instead of configuring backup schedules individually per service, AWS Backup lets you define a single backup plan that covers multiple resource types.</p>
+      <p><strong>Supported resources:</strong> EBS volumes, RDS databases, DynamoDB tables, EFS file systems, S3 buckets, EC2 instances, Aurora, DocumentDB, Neptune, FSx, Storage Gateway.</p>
+      <p><strong>Key features:</strong> backup plans with CRON schedules, retention policies, cross-region and cross-account copy for DR, point-in-time restore, compliance reporting via AWS Backup Audit Manager.</p>
+      <div class="tip info"><strong>Use when:</strong> you need consistent backup policy across multiple AWS services and accounts, or need to demonstrate compliance (SOC2, HIPAA) with backup controls.</div>
+    </div>
+  </details>
+
 </section>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -1267,70 +1290,6 @@ git push -u origin feature/new-branch # push new branch to remote and set upstre
 
 </section>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- BEHAVIORAL                                 -->
-<!-- ═══════════════════════════════════════════ -->
-<section class="cat" id="behavioral">
-  <div class="cat-hdr">
-    <span class="cat-dot" style="background:var(--lavender)"></span>
-    <span class="cat-title">Behavioral</span>
-    <span class="cat-n">3 questions</span>
-  </div>
-
-  <details class="qa">
-    <summary><span class="q-text">Implement Bubble Sort (coding question in DevOps interviews)</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
-    <div class="ans">
-      <p>Bubble Sort repeatedly steps through the array, compares adjacent elements, and swaps them if they're in the wrong order. Largest elements "bubble up" to the end each pass.</p>
-      <div class="cb"><div class="cb-hdr">Python</div><pre>def bubble_sort(arr):
-    n = len(arr)
-    for i in range(n):
-        for j in range(0, n - i - 1):   # last i elements already sorted
-            if arr[j] &gt; arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-    return arr
-
-print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))
-# [11, 12, 22, 25, 34, 64, 90]</pre></div>
-      <div class="cb"><div class="cb-hdr">Bash (if asked for bash script)</div><pre>#!/bin/bash
-arr=(64 34 25 12 22 11 90)
-n=${#arr[@]}
-for ((i=0; i&lt;n; i++)); do
-  for ((j=0; j&lt;n-i-1; j++)); do
-    if [ ${arr[j]} -gt ${arr[$((j+1))]} ]; then
-      tmp=${arr[j]}; arr[j]=${arr[$((j+1))]}; arr[$((j+1))]=$tmp
-    fi
-  done
-done
-echo "${arr[@]}"</pre></div>
-      <p><strong>Complexity:</strong> O(n²) time, O(1) space. Not efficient for large arrays — just demonstrates basic sorting logic.</p>
-    </div>
-  </details>
-
-  <details class="qa">
-    <summary><span class="q-text">How do you list Docker images?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
-    <div class="ans">
-      <div class="cb"><div class="cb-hdr">docker image commands</div><pre>docker images                         # list all local images (REPOSITORY, TAG, IMAGE ID, SIZE)
-docker images -a                      # include intermediate images
-docker images --filter "dangling=true" # untagged (dangling) images
-docker image ls                       # same as docker images
-docker image inspect nginx:latest     # full metadata of a specific image
-docker rmi image-id                   # remove an image
-docker image prune                    # remove all dangling images
-docker image prune -a                 # remove all unused images</pre></div>
-    </div>
-  </details>
-
-  <details class="qa">
-    <summary><span class="q-text">AWS Backup — what is it and when do you use it?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
-    <div class="ans">
-      <p>Centralized, policy-driven backup service for AWS resources. Instead of configuring backup schedules individually per service, AWS Backup lets you define a single backup plan that covers multiple resource types.</p>
-      <p><strong>Supported resources:</strong> EBS volumes, RDS databases, DynamoDB tables, EFS file systems, S3 buckets, EC2 instances, Aurora, DocumentDB, Neptune, FSx, Storage Gateway.</p>
-      <p><strong>Key features:</strong> backup plans with CRON schedules, retention policies, cross-region and cross-account copy for DR, point-in-time restore, compliance reporting via AWS Backup Audit Manager.</p>
-      <div class="tip info"><strong>Use when:</strong> you need consistent backup policy across multiple AWS services and accounts, or need to demonstrate compliance (SOC2, HIPAA) with backup controls.</div>
-    </div>
-  </details>
-
-</section>
 
 </main>
 </div>
