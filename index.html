@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Interview Prep — Megha Shivhare</title>
+  <style>
+    :root {
+      --bg: #0D1117;
+      --surface: #161B22;
+      --border: #30363D;
+      --text: #CDD9E5;
+      --muted: #7D8590;
+      --accent: #58A6FF;
+      --green: #3FB950;
+      --orange: #F0A500;
+      --teal: #2DD4BF;
+      --pink: #F472B6;
+      --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+      --sans: system-ui, -apple-system, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    /* HEADER */
+    header { margin-bottom: 3.5rem; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 580px;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 1.5rem;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid;
+    }
+    .tag-blue  { color: var(--accent); border-color: rgba(88,166,255,0.3); background: rgba(88,166,255,0.08); }
+    .tag-green { color: var(--green);  border-color: rgba(63,185,80,0.3);  background: rgba(63,185,80,0.08); }
+    .tag-orange{ color: var(--orange); border-color: rgba(240,165,0,0.3);  background: rgba(240,165,0,0.08); }
+    .tag-teal  { color: var(--teal);   border-color: rgba(45,212,191,0.3); background: rgba(45,212,191,0.08); }
+    .tag-pink  { color: var(--pink);   border-color: rgba(244,114,182,0.3);background: rgba(244,114,182,0.08); }
+
+    /* GUIDE CARDS */
+    .guides { display: flex; flex-direction: column; gap: 16px; }
+
+    .card {
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 3px 0 0 3px;
+    }
+    .card:hover { transform: translateY(-1px); }
+
+    .card.karpenter::before  { background: var(--accent); }
+    .card.gitops::before     { background: var(--teal); }
+    .card.warroom::before    { background: var(--orange); }
+
+    .card:hover.karpenter  { border-color: rgba(88,166,255,0.5); }
+    .card:hover.gitops     { border-color: rgba(45,212,191,0.5); }
+    .card:hover.warroom    { border-color: rgba(240,165,0,0.5); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      border: 1px solid;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .karpenter .card-badge  { color: var(--accent); border-color: rgba(88,166,255,0.3); background: rgba(88,166,255,0.08); }
+    .gitops    .card-badge  { color: var(--teal);   border-color: rgba(45,212,191,0.3); background: rgba(45,212,191,0.08); }
+    .warroom   .card-badge  { color: var(--orange); border-color: rgba(240,165,0,0.3);  background: rgba(240,165,0,0.08); }
+
+    .card-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-bullets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .bullet {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .card-footer {
+      margin-top: 1.25rem;
+      font-family: var(--mono);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .karpenter .card-footer { color: var(--accent); }
+    .gitops    .card-footer { color: var(--teal); }
+    .warroom   .card-footer { color: var(--orange); }
+
+    /* FOOTER */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    footer p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <p class="eyebrow">DevOps · Interview Preparation</p>
+    <h1>Study Guides &amp;<br>Interview Prep</h1>
+    <p class="subtitle">
+      Interactive guides covering Karpenter, GitOps with ArgoCD + Kargo, and a structured 2-day prep plan — built from real implementations at Blinq.IO.
+    </p>
+    <div class="tags">
+      <span class="tag tag-blue">Kubernetes</span>
+      <span class="tag tag-blue">EKS</span>
+      <span class="tag tag-orange">Karpenter</span>
+      <span class="tag tag-teal">ArgoCD</span>
+      <span class="tag tag-teal">Kargo</span>
+      <span class="tag tag-green">Terraform</span>
+      <span class="tag tag-green">AWS</span>
+      <span class="tag tag-pink">GitOps</span>
+    </div>
+  </header>
+
+  <div class="guides">
+
+    <a class="card karpenter" href="karpenter-study-guide.html">
+      <div class="card-header">
+        <div class="card-title">Karpenter Deep Dive</div>
+        <span class="card-badge">DEEP DIVE</span>
+      </div>
+      <p class="card-desc">
+        A comprehensive tabbed reference covering Karpenter v1 — from why it beats Cluster Autoscaler, to how the provisioning and consolidation loops work, to real annotated NodePool and EC2NodeClass YAML.
+      </p>
+      <div class="card-bullets">
+        <span class="bullet">Karpenter vs CA comparison</span>
+        <span class="bullet">Provisioning loop</span>
+        <span class="bullet">NodePool config</span>
+        <span class="bullet">EC2NodeClass</span>
+        <span class="bullet">Disruption &amp; drift</span>
+        <span class="bullet">Spot handling</span>
+        <span class="bullet">Two-NodePool architecture</span>
+      </div>
+      <div class="card-footer">Open guide →</div>
+    </a>
+
+    <a class="card gitops" href="gitops-interview-guide.html">
+      <div class="card-header">
+        <div class="card-title">GitOps Interview Guide</div>
+        <span class="card-badge">ARGOCD · KARGO</span>
+      </div>
+      <p class="card-desc">
+        Everything about the GitOps stack — from the four core principles, to ArgoCD's App of Apps pattern and sync waves, to Kargo's promotion pipeline. Includes the real Blinq.IO setup with 11 warehouses and 14 stages.
+      </p>
+      <div class="card-bullets">
+        <span class="bullet">GitOps principles</span>
+        <span class="bullet">Push vs pull CD</span>
+        <span class="bullet">ArgoCD core concepts</span>
+        <span class="bullet">App of Apps</span>
+        <span class="bullet">Sync waves</span>
+        <span class="bullet">Kargo promotion pipeline</span>
+        <span class="bullet">Mock Q&amp;A</span>
+      </div>
+      <div class="card-footer">Open guide →</div>
+    </a>
+
+    <a class="card warroom" href="interview-war-room.html">
+      <div class="card-header">
+        <div class="card-title">2-Day Interview War Room</div>
+        <span class="card-badge">PREP PLAN</span>
+      </div>
+      <p class="card-desc">
+        A structured 2-day prep checklist with a live readiness tracker, STAR stories, and model answers for likely interview questions — covering cost optimization, Kubernetes, Terraform, CI/CD, and behavioral.
+      </p>
+      <div class="card-bullets">
+        <span class="bullet">AWS cost optimization ($8K saved)</span>
+        <span class="bullet">Kubernetes &amp; EKS</span>
+        <span class="bullet">Terraform IaC</span>
+        <span class="bullet">CI/CD pipelines</span>
+        <span class="bullet">STAR stories</span>
+        <span class="bullet">Live readiness tracker</span>
+      </div>
+      <div class="card-footer">Open guide →</div>
+    </a>
+
+  </div>
+
+  <footer>
+    <p>Built by <a href="https://github.com/MeghaShivhare">Megha Shivhare</a> — DevOps engineer · EKS · Karpenter · ArgoCD · Kargo · Terraform</p>
+    <p><a href="https://github.com/MeghaShivhare/devops-interview-prep">View on GitHub</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
