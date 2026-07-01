@@ -33,6 +33,19 @@ A structured 2-day prep plan with checklists and STAR stories:
 - Likely interview questions with model answers
 - Live readiness tracker that updates as you check off topics
 
+### [Most Asked Interview Questions](interview-questions.html)
+60+ real DevOps interview questions with full answers, organized by category:
+- Kubernetes & EKS (19 questions) — control plane, etcd, StatefulSets, RBAC, DaemonSets, pod networking
+- Docker & Containers (9 questions) — Dockerfiles, multi-stage builds, image optimization
+- AWS Services (16 questions) — EC2, VPC, S3, ALB/NLB, IAM, ECS, Route53, CloudWatch
+- Networking & DNS (6 questions) — DNS resolution, VPC traffic flow, Security Groups vs NACLs
+- CI/CD & Deployments (5 questions) — Jenkins pipelines, blue-green vs canary, weighted traffic
+- Monitoring & SRE (6 questions) — the four golden signals, SLI/SLO/SLA, incident response
+- Terraform & IaC (3 questions) — variable precedence, reliability strategies
+- Security & IAM (3 questions) — AuthN vs AuthZ, TLS certificates
+- Linux & Systems (4 questions) — process commands, nice values, hypervisor types
+- Behavioral (3 questions) — coding questions, team collaboration
+
 ## How to use
 
 ```bash

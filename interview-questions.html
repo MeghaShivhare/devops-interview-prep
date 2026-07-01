@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps Most Asked Interview Questions</title>
+<meta name="description" content="60+ most asked DevOps interview questions with answers — Kubernetes, Docker, AWS, CI/CD, Terraform, Monitoring, Linux, and more.">
+<style>
+:root {
+  --bg:#0D1117; --surface:#161B22; --surface2:#1C2128; --border:#30363D;
+  --text:#CDD9E5; --muted:#7D8590; --dim:#484F58;
+  --blue:#58A6FF; --teal:#2DD4BF; --orange:#F0A500; --purple:#C084FC;
+  --green:#4ADE80; --pink:#F472B6; --emerald:#34D399; --amber:#FFA657;
+  --slate:#94A3B8; --lavender:#A78BFA; --red:#F85149;
+  --mono:ui-monospace,'SF Mono','Cascadia Code',Consolas,monospace;
+  --sans:system-ui,-apple-system,sans-serif;
+  --nav:230px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-columns:var(--nav) 1fr;min-height:100vh}
+
+/* SIDEBAR */
+nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 0;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.nav-brand{padding:0 1.25rem 1rem;border-bottom:1px solid var(--border);margin-bottom:0.75rem}
+.nav-brand strong{display:block;font-family:var(--mono);font-size:12px;color:var(--text);margin-bottom:1px}
+.nav-brand span{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.nav-search{padding:0 1rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.5rem}
+.nav-search input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 9px;font-size:12px;color:var(--text);font-family:var(--sans);outline:none}
+.nav-search input::placeholder{color:var(--dim)}
+.nav-search input:focus{border-color:var(--blue)}
+.nav-link{display:flex;align-items:center;gap:8px;padding:5px 1.25rem;text-decoration:none;color:var(--muted);font-size:12.5px;transition:color .12s}
+.nav-link:hover,.nav-link.active{color:var(--text)}
+.nav-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.nav-count{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim);background:var(--surface2);padding:1px 6px;border-radius:10px}
+
+/* MAIN */
+main{padding:2.5rem 3rem 5rem;max-width:940px}
+
+/* HERO */
+.hero{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.hero h1{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:var(--text);line-height:1.15;margin-bottom:.6rem}
+.hero p{font-size:13.5px;color:var(--muted);line-height:1.75;max-width:620px}
+.stats{display:flex;gap:2rem;margin-top:1.25rem;flex-wrap:wrap}
+.stat-num{font-family:var(--mono);font-size:1.6rem;font-weight:700;color:var(--text);display:block;line-height:1}
+.stat-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;display:block}
+
+/* CATEGORY SECTION */
+.cat{margin-bottom:2.5rem;scroll-margin-top:1.5rem}
+.cat-hdr{display:flex;align-items:center;gap:9px;margin-bottom:.85rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cat-title{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
+.cat-n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* Q&A ACCORDION */
+.qa{border:1px solid var(--border);border-radius:6px;margin-bottom:5px;overflow:hidden}
+.qa summary{display:flex;align-items:center;gap:9px;padding:11px 14px;cursor:pointer;background:var(--surface);list-style:none;transition:background .12s}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary:hover{background:var(--surface2)}
+.qa[open] summary{background:var(--surface2);border-bottom:1px solid var(--border)}
+.q-text{flex:1;font-size:13px;color:var(--text);line-height:1.4;font-weight:500}
+.q-arr{font-size:10px;color:var(--muted);transition:transform .18s;flex-shrink:0}
+.qa[open] .q-arr{transform:rotate(90deg)}
+.diff{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;border:1px solid;flex-shrink:0;white-space:nowrap}
+.easy{color:#3FB950;border-color:rgba(63,185,80,.3);background:rgba(63,185,80,.07)}
+.med{color:#F0A500;border-color:rgba(240,165,0,.3);background:rgba(240,165,0,.07)}
+.hard{color:#F85149;border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.07)}
+.sys{color:#A78BFA;border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.07)}
+
+/* ANSWER BODY */
+.ans{padding:14px 16px 16px;background:var(--surface)}
+.ans p{font-size:13px;color:var(--text);line-height:1.75;margin-bottom:.6rem}
+.ans p:last-child{margin-bottom:0}
+.ans ul,.ans ol{margin:.4rem 0 .7rem 1.2rem}
+.ans li{font-size:13px;color:var(--text);line-height:1.7;margin-bottom:2px}
+.ans strong{color:var(--text);font-weight:600}
+.ans h4{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:.9rem 0 .4rem}
+.ans h4:first-child{margin-top:0}
+
+/* inline code */
+.ans code{font-family:var(--mono);font-size:11.5px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;color:#A8C7E8}
+
+/* code block */
+.cb{background:#010409;border:1px solid var(--border);border-radius:5px;overflow:hidden;margin:.65rem 0}
+.cb-hdr{padding:5px 12px;background:var(--surface2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted)}
+.cb pre{padding:11px 14px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.65;color:var(--text)}
+
+/* tip box */
+.tip{border-left:2px solid;padding:9px 13px;border-radius:0 4px 4px 0;margin:.65rem 0;font-size:12.5px;line-height:1.65;color:var(--muted)}
+.tip.info{border-color:var(--blue);background:rgba(88,166,255,.06)}
+.tip.good{border-color:var(--emerald);background:rgba(52,211,153,.06)}
+.tip.warn{border-color:var(--amber);background:rgba(255,166,87,.06)}
+.tip strong{color:var(--text)}
+
+/* comparison table */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:.65rem 0;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.tbl th{background:var(--surface2);padding:6px 12px;text-align:left;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border)}
+.tbl td{padding:6px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;line-height:1.55}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surface2)}
+.tbl td:first-child{font-family:var(--mono);font-size:11.5px;color:var(--blue);white-space:nowrap}
+
+/* precedence list */
+.prec{counter-reset:prec;margin:.5rem 0 .75rem}
+.prec li{counter-increment:prec;display:flex;align-items:baseline;gap:10px;padding:5px 10px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text)}
+.prec li::before{content:counter(prec);font-family:var(--mono);font-size:10px;color:var(--dim);flex-shrink:0;min-width:16px}
+.prec li:last-child{border-bottom:none}
+.prec-arrow{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto}
+
+/* hidden by search */
+.hidden{display:none!important}
+
+/* RESPONSIVE */
+@media(max-width:768px){.shell{grid-template-columns:1fr}nav{display:none}main{padding:1.5rem 1rem 3rem}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ── SIDEBAR ──────────────────────────────── -->
+<nav id="sidebar">
+  <div class="nav-brand">
+    <strong>Interview Q&amp;A</strong>
+    <span>60+ Questions</span>
+  </div>
+  <div class="nav-search">
+    <input type="text" id="searchInput" placeholder="Search questions…">
+  </div>
+  <a href="#k8s"        class="nav-link"><span class="nav-dot" style="background:var(--blue)"></span>Kubernetes &amp; EKS<span class="nav-count">19</span></a>
+  <a href="#docker"     class="nav-link"><span class="nav-dot" style="background:var(--teal)"></span>Docker &amp; Containers<span class="nav-count">9</span></a>
+  <a href="#aws"        class="nav-link"><span class="nav-dot" style="background:var(--orange)"></span>AWS Services<span class="nav-count">16</span></a>
+  <a href="#net"        class="nav-link"><span class="nav-dot" style="background:var(--purple)"></span>Networking &amp; DNS<span class="nav-count">6</span></a>
+  <a href="#cicd"       class="nav-link"><span class="nav-dot" style="background:var(--green)"></span>CI/CD &amp; Deployments<span class="nav-count">5</span></a>
+  <a href="#obs"        class="nav-link"><span class="nav-dot" style="background:var(--pink)"></span>Monitoring &amp; SRE<span class="nav-count">6</span></a>
+  <a href="#iac"        class="nav-link"><span class="nav-dot" style="background:var(--emerald)"></span>Terraform &amp; IaC<span class="nav-count">3</span></a>
+  <a href="#security"   class="nav-link"><span class="nav-dot" style="background:var(--amber)"></span>Security &amp; IAM<span class="nav-count">3</span></a>
+  <a href="#linux"      class="nav-link"><span class="nav-dot" style="background:var(--slate)"></span>Linux &amp; Systems<span class="nav-count">4</span></a>
+  <a href="#behavioral" class="nav-link"><span class="nav-dot" style="background:var(--lavender)"></span>Behavioral<span class="nav-count">3</span></a>
+</nav>
+
+<!-- ── MAIN ─────────────────────────────────── -->
+<main>
+
+<header class="hero">
+  <p class="eyebrow">DevOps Interview Preparation</p>
+  <h1>Most Asked Interview Questions</h1>
+  <p>Real questions from real interviews — Kubernetes, Docker, AWS, CI/CD, Terraform, monitoring, Linux, and behavioral. Answers are concise and interview-ready.</p>
+  <div class="stats">
+    <div><span class="stat-num">60+</span><span class="stat-lbl">Questions</span></div>
+    <div><span class="stat-num">10</span><span class="stat-lbl">Categories</span></div>
+    <div><span class="stat-num">3</span><span class="stat-lbl">Difficulty levels</span></div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- KUBERNETES & EKS                           -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="k8s">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--blue)"></span>
+    <span class="cat-title">Kubernetes &amp; EKS</span>
+    <span class="cat-n">19 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">What are the components of the Kubernetes control plane?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>API Server (kube-apiserver)</strong> — the front door. All kubectl commands, internal components, and external tools talk to it. Validates and persists state to etcd.</li>
+        <li><strong>etcd</strong> — distributed key-value store that holds all cluster state (pods, services, configmaps, secrets). The single source of truth.</li>
+        <li><strong>Scheduler (kube-scheduler)</strong> — watches for unscheduled pods and assigns them to nodes based on resource requirements, affinity rules, and taints/tolerations.</li>
+        <li><strong>Controller Manager (kube-controller-manager)</strong> — runs controller loops: Deployment controller, ReplicaSet controller, Node controller, etc. Continuously reconciles desired vs actual state.</li>
+        <li><strong>Cloud Controller Manager</strong> — AWS-specific controllers: provisions load balancers, manages EBS volumes, handles node lifecycle with EC2.</li>
+      </ul>
+      <div class="tip info"><strong>EKS-specific:</strong> AWS runs the control plane in a separate managed VPC. You don't have direct access to etcd or the API server nodes — AWS manages HA, patching, and backups.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Explain etcd in detail.</span><span class="diff hard">Hard</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>What it is:</strong> Distributed, consistent key-value store. Stores all Kubernetes cluster state — every pod, service, configmap, secret, deployment, etc.</li>
+        <li><strong>Consensus:</strong> Uses the Raft consensus algorithm. One leader handles all writes; followers replicate. Quorum requires (N/2)+1 members — always use an odd number of nodes (1, 3, 5).</li>
+        <li><strong>Watch mechanism:</strong> Clients subscribe to changes on a key prefix. This is how K8s controllers work — they watch etcd for changes and react. Every <code>kubectl get --watch</code> is an etcd watch.</li>
+        <li><strong>resourceVersion:</strong> Every object in etcd has a <code>resourceVersion</code>. Used for optimistic concurrency — if two writers modify the same object, the second write is rejected.</li>
+        <li><strong>Backup/restore:</strong> <code>etcdctl snapshot save backup.db</code> and <code>etcdctl snapshot restore backup.db</code>. Critical to back up before cluster upgrades.</li>
+      </ul>
+      <div class="tip warn"><strong>In EKS:</strong> You cannot access etcd directly. AWS manages it. Back up by exporting critical manifests to Git (GitOps) rather than relying on etcd snapshots.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How do you upgrade an EKS cluster version without downtime?</span><span class="diff hard">Hard</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ol>
+        <li><strong>Check release notes</strong> — review K8s changelog for deprecated APIs and breaking changes. Test your manifests against the new version.</li>
+        <li><strong>Upgrade control plane first</strong> — via EKS console or <code>aws eks update-cluster-version</code>. AWS handles this with minimal disruption; API server may be briefly unavailable but pods keep running.</li>
+        <li><strong>Update add-ons</strong> — kube-proxy, CoreDNS, VPC CNI must be updated to versions compatible with the new K8s version. Do this after control plane upgrade.</li>
+        <li><strong>Update node groups (rolling)</strong> — managed node groups support rolling updates: new nodes are provisioned with the new AMI/version, then old nodes are cordoned and drained one by one. PodDisruptionBudgets ensure replicas stay available during drain.</li>
+        <li><strong>Verify</strong> — check all pods are Running, all add-ons healthy, <code>kubectl get nodes</code> shows new version.</li>
+      </ol>
+      <div class="tip good"><strong>Zero-downtime key:</strong> Set PodDisruptionBudgets on all critical workloads before upgrading. Without a PDB, drain can evict all replicas of a deployment simultaneously.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What is the difference between desired state and current state in Kubernetes?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Desired state:</strong> what you declare in your YAML manifest — "I want 3 replicas of this pod running image:v2."</li>
+        <li><strong>Current state:</strong> what is actually running in the cluster right now.</li>
+        <li><strong>Reconciliation loop:</strong> K8s controllers continuously compare desired vs current state and take actions to close the gap. If a pod crashes, the ReplicaSet controller sees current=2, desired=3 and creates a new pod.</li>
+      </ul>
+      <p>This is the core of Kubernetes: <strong>declarative, self-healing</strong>. You declare the end state, K8s figures out how to achieve it and keeps it that way.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Stateful vs stateless applications in EKS — and how is data managed?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th>Aspect</th><th>Stateless</th><th>Stateful</th></tr>
+        <tr><td>State</td><td>No state stored per instance</td><td>State persists between requests</td></tr>
+        <tr><td>K8s object</td><td>Deployment</td><td>StatefulSet</td></tr>
+        <tr><td>Pod names</td><td>Random suffix</td><td>Stable: pod-0, pod-1, pod-2</td></tr>
+        <tr><td>Storage</td><td>Ephemeral / shared</td><td>Each pod gets its own PVC</td></tr>
+        <tr><td>Scaling</td><td>Any order</td><td>Ordered (pod-0 before pod-1)</td></tr>
+        <tr><td>Examples</td><td>REST APIs, web servers</td><td>Databases, Kafka, Redis cluster</td></tr>
+      </table>
+      <h4>How data is managed in StatefulSets</h4>
+      <ul>
+        <li>Each pod gets a unique PersistentVolumeClaim (PVC) — e.g. <code>data-postgres-0</code>, <code>data-postgres-1</code>.</li>
+        <li>When a pod restarts (even on a different node), Kubernetes reattaches the same PVC — the data survives.</li>
+        <li>PVCs are NOT deleted when the StatefulSet is deleted — must be cleaned up manually to avoid data loss.</li>
+      </ul>
+      <h4>Cross-question: using a database while storing state</h4>
+      <p>For managed databases (RDS, Aurora), pods connect via a service endpoint — the state is <em>external</em> to the cluster entirely. The pod is stateless; the database is not in Kubernetes. For in-cluster databases (PostgreSQL StatefulSet), each pod mounts its own EBS-backed PVC via a StorageClass.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Secrets vs ConfigMap in Kubernetes — when do you use each?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>ConfigMap</th><th>Secret</th></tr>
+        <tr><td>Use for</td><td>Non-sensitive config: env vars, config files, flags</td><td>Sensitive data: passwords, API keys, TLS certs, tokens</td></tr>
+        <tr><td>Storage</td><td>Plaintext in etcd</td><td>Base64-encoded in etcd (not encrypted by default)</td></tr>
+        <tr><td>Access</td><td>Env var or volume mount</td><td>Env var or volume mount</td></tr>
+      </table>
+      <p>Both can be mounted as environment variables or as files in a volume.</p>
+      <div class="tip warn"><strong>Important:</strong> Base64 is encoding, not encryption. For real security, enable etcd encryption at rest (KMS) or use External Secrets Operator to pull from AWS Secrets Manager — so secrets never live in the cluster at all.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">RBAC in Kubernetes — ClusterRole vs Role, ClusterRoleBinding vs RoleBinding</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th>Object</th><th>Scope</th><th>What it does</th></tr>
+        <tr><td>Role</td><td>Namespace</td><td>Defines permissions (verbs: get/list/create) on resources within a namespace</td></tr>
+        <tr><td>ClusterRole</td><td>Cluster-wide</td><td>Same as Role but for all namespaces + non-namespaced resources (nodes, PVs)</td></tr>
+        <tr><td>RoleBinding</td><td>Namespace</td><td>Binds a Role (or ClusterRole) to users/groups/ServiceAccounts in one namespace</td></tr>
+        <tr><td>ClusterRoleBinding</td><td>Cluster-wide</td><td>Binds a ClusterRole to subjects cluster-wide</td></tr>
+      </table>
+      <p>Common pattern: create one <code>ClusterRole</code> for "pod reader" permissions, then use a <code>RoleBinding</code> in each namespace to limit which team can use it where.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Node Affinity, Node Selector, Pod Affinity, and Pod Anti-Affinity</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>NodeSelector:</strong> simplest form. Key-value label match on nodes. Binary — either the node has the label or it doesn't. <code>disktype: ssd</code></li>
+        <li><strong>Node Affinity:</strong> more expressive version of NodeSelector. Two types: <code>requiredDuringSchedulingIgnoredDuringExecution</code> (hard — pod won't schedule if not satisfied) and <code>preferredDuringScheduling…</code> (soft — scheduler tries but continues if not possible). Supports operators: In, NotIn, Exists, Gt.</li>
+        <li><strong>Pod Affinity:</strong> schedule this pod <em>near</em> other pods that match a label selector (same node or same zone). Use case: app pod colocated with its Redis sidecar for low latency.</li>
+        <li><strong>Pod Anti-Affinity:</strong> spread pods <em>away</em> from each other. Use case: ensure two replicas of a deployment never land on the same node — improves HA.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Cordon, Drain, Uncordon, and NoExecute taint — explain each</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Cordon:</strong> <code>kubectl cordon &lt;node&gt;</code> — marks the node as <code>Unschedulable</code>. No new pods will land on it. Existing pods keep running undisturbed.</li>
+        <li><strong>Drain:</strong> <code>kubectl drain &lt;node&gt; --ignore-daemonsets --delete-emptydir-data</code> — gracefully evicts all pods (respecting PodDisruptionBudgets and terminationGracePeriodSeconds). Automatically cordons the node first.</li>
+        <li><strong>Uncordon:</strong> <code>kubectl uncordon &lt;node&gt;</code> — makes the node schedulable again after maintenance.</li>
+        <li><strong>NoExecute taint:</strong> stronger than cordon. Evicts pods that don't have a matching toleration, either immediately or after <code>tolerationSeconds</code>. Applied automatically when a node goes NotReady — pods without the toleration are evicted after 300 seconds by default.</li>
+      </ul>
+      <div class="tip info"><strong>Maintenance sequence:</strong> cordon → drain → perform maintenance → uncordon.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Labels and Selectors in Kubernetes</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Labels:</strong> key-value pairs attached to any K8s object. <code>app: frontend</code>, <code>env: prod</code>, <code>version: v2</code>. Used to organize and select objects.</li>
+        <li><strong>Selectors:</strong> queries that filter objects by their labels. A Service uses a selector to find the pods it routes traffic to. A Deployment uses a selector to manage its ReplicaSet pods.</li>
+        <li><strong>Equality-based:</strong> <code>app=frontend</code> — exact match.</li>
+        <li><strong>Set-based:</strong> <code>env in (prod, staging)</code> — more expressive, used in affinity rules and node selectors.</li>
+      </ul>
+      <p>Labels are the glue of Kubernetes — Services, Deployments, NetworkPolicies, and HPA all use label selectors to target the right set of pods.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Service discovery failing across namespaces — no DNS issues. Troubleshoot.</span><span class="diff hard">Hard</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Root cause:</strong> When reaching a service in another namespace, you must use the Fully Qualified Domain Name (FQDN), not just the service name.</p>
+      <table class="tbl">
+        <tr><th>Context</th><th>Address format</th></tr>
+        <tr><td>Same namespace</td><td><code>http://service-name</code></td></tr>
+        <tr><td>Different namespace</td><td><code>http://service-name.namespace.svc.cluster.local</code></td></tr>
+      </table>
+      <h4>Other things to check if FQDN is correct</h4>
+      <ul>
+        <li><strong>NetworkPolicy:</strong> a deny-all NetworkPolicy in the target namespace may be blocking ingress from other namespaces — check for <code>podSelector: {}</code> with no ingress rules.</li>
+        <li><strong>Service exists:</strong> <code>kubectl get svc -n &lt;target-namespace&gt;</code> — verify the service name and port.</li>
+        <li><strong>Endpoints:</strong> <code>kubectl get endpoints -n &lt;target-namespace&gt;</code> — if empty, pods aren't matching the service selector.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What are Init Containers?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Containers that run to completion <em>before</em> the main application container starts. They run sequentially — init-1 must complete before init-2 starts, which must complete before the main container starts.</p>
+      <p><strong>Use cases:</strong> wait for a database to be ready, run database migrations, download config from S3, set file permissions that the main container needs.</p>
+      <p>If an init container fails, the pod restarts and tries again. The main container never starts until all init containers succeed.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What is a DaemonSet and when do you use it?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>A DaemonSet ensures exactly one pod runs on every node (or every node matching a nodeSelector). When nodes are added, the pod is automatically added. When nodes are removed, the pod is garbage collected.</p>
+      <p><strong>Use cases:</strong> log collectors (Fluentd, Filebeat), node monitoring agents (Node Exporter, Datadog agent), networking plugins (CNI), security agents.</p>
+      <div class="tip warn"><strong>Drain behavior:</strong> DaemonSet pods are NOT evicted during <code>kubectl drain</code> by default. Use <code>--ignore-daemonsets</code> flag when draining to proceed anyway.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Sidecar pattern — what is it and how does log shipping work?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>A sidecar is a second container in the same pod that augments the main container. They share the same network namespace (localhost) and can share storage volumes.</p>
+      <p><strong>Log shipping pattern:</strong> main container writes logs to a shared emptyDir volume → sidecar container tails that volume and ships logs to a log aggregator (CloudWatch, Loki, Elasticsearch). The main app doesn't need to know about the logging destination.</p>
+      <p><strong>Other sidecar uses:</strong> Istio/Envoy service mesh proxy, config reloader, metrics scraper.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What is the Kubeconfig file?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>The file (<code>~/.kube/config</code>) that kubectl reads to know how to connect to a cluster. Contains three types of entries:</p>
+      <ul>
+        <li><strong>clusters:</strong> API server URL + CA certificate</li>
+        <li><strong>users:</strong> credentials (client cert, token, or exec plugin like aws-iam-authenticator)</li>
+        <li><strong>contexts:</strong> a named binding of cluster + user + optional namespace</li>
+        <li><strong>current-context:</strong> which context kubectl uses by default</li>
+      </ul>
+      <div class="cb"><div class="cb-hdr">common kubeconfig commands</div><pre>kubectl config get-contexts          # list all contexts
+kubectl config use-context my-cluster # switch context
+kubectl config current-context       # show active context
+aws eks update-kubeconfig --name my-cluster --region eu-north-1  # add EKS cluster</pre></div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Does Prometheus run as a DaemonSet or a regular Pod?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>It depends on which Prometheus component — this is a trick question:</p>
+      <table class="tbl">
+        <tr><th>Component</th><th>Controller</th><th>Why</th></tr>
+        <tr><td>Prometheus Server</td><td>Deployment / StatefulSet</td><td>Single central collector/storage. HA via Thanos.</td></tr>
+        <tr><td>Node Exporter</td><td><strong>DaemonSet</strong></td><td>Must run on every node to collect that node's CPU/memory/disk metrics</td></tr>
+        <tr><td>kube-state-metrics</td><td>Deployment</td><td>Queries K8s API, doesn't need to be per-node</td></tr>
+        <tr><td>Alertmanager</td><td>Deployment / StatefulSet</td><td>HA pair for deduplication and routing</td></tr>
+      </table>
+      <div class="tip good"><strong>The answer interviewers are testing:</strong> Node Exporter is the DaemonSet. Prometheus server itself is a Deployment/StatefulSet running as a regular pod.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How does pod-to-pod and pod-to-node communication work?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Pod-to-pod (same node):</strong> via a virtual ethernet pair (veth) through the node's network bridge. Pods on the same node communicate directly over the bridge — no NAT, no external hop.</li>
+        <li><strong>Pod-to-pod (different nodes):</strong> via the CNI plugin (aws-node / VPC CNI in EKS). Each pod gets a real VPC IP. Traffic between pods on different nodes goes through the VPC network directly.</li>
+        <li><strong>Pod-to-itself (localhost):</strong> containers within the same pod share a network namespace. They communicate via <code>localhost:port</code>. This is how sidecar containers communicate with the main container.</li>
+        <li><strong>Pod-to-service:</strong> via kube-proxy, which maintains iptables/ipvs rules. The service's ClusterIP is a virtual IP — kube-proxy rewrites traffic to a real pod IP based on the service's endpoint list.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How do you list pods in Kubernetes? (Basic commands)</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <div class="cb"><div class="cb-hdr">kubectl pod commands</div><pre>kubectl get pods                        # pods in current namespace
+kubectl get pods -n kube-system         # pods in specific namespace
+kubectl get pods -A                     # pods in all namespaces
+kubectl get pods -o wide                # with node and IP columns
+kubectl get pods --field-selector status.phase=Running  # filter by status
+kubectl describe pod &lt;name&gt;             # detailed info + events
+kubectl logs &lt;pod&gt; -c &lt;container&gt;       # container logs
+kubectl exec -it &lt;pod&gt; -- /bin/sh       # shell into pod</pre></div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Stateful vs Stateless creation sequence in Kubernetes</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Deployment (stateless):</strong> pods are created in parallel, in any order, with random name suffixes. Scale-down kills pods randomly.</p>
+      <p><strong>StatefulSet (stateful):</strong> pods are created sequentially — <code>pod-0</code> must be Running and Ready before <code>pod-1</code> starts. Scale-down terminates in reverse order (<code>pod-2</code> before <code>pod-1</code> before <code>pod-0</code>). This ordering matters for databases where pod-0 is typically the primary and must exist before replicas join.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DOCKER & CONTAINERS                        -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="docker">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--teal)"></span>
+    <span class="cat-title">Docker &amp; Containers</span>
+    <span class="cat-n">9 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">Explain a Dockerfile and its key instructions</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>A text file with step-by-step instructions to build a Docker image. Each instruction creates a layer in the image.</p>
+      <div class="cb"><div class="cb-hdr">Dockerfile</div><pre>FROM node:18-alpine          # base image
+WORKDIR /app                 # set working directory
+COPY package*.json ./        # copy dependency files
+RUN npm ci --only=production # install deps (creates a layer)
+COPY . .                     # copy source code
+ENV NODE_ENV=production      # set env var
+EXPOSE 3000                  # document the port (doesn't publish)
+USER node                    # run as non-root for security
+CMD ["node", "server.js"]    # default start command</pre></div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What is a multi-stage Dockerfile and why use it?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Uses multiple <code>FROM</code> statements. Only the final stage ends up in the image — all build tools, compilers, and test dependencies are discarded.</p>
+      <div class="cb"><div class="cb-hdr">multi-stage Dockerfile</div><pre>FROM node:18 AS builder          # build stage — has npm, node_modules
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build                # produces /app/dist
+
+FROM nginx:alpine                # final stage — tiny, no node
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]</pre></div>
+      <p>Result: final image is ~25MB (nginx:alpine + built assets) instead of ~400MB (full node image with all dependencies).</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How do you minimize Docker image size?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ol>
+        <li><strong>Use slim/alpine base images</strong> — <code>node:18-alpine</code> (50MB) vs <code>node:18</code> (1GB).</li>
+        <li><strong>Multi-stage builds</strong> — build tools never enter the final image.</li>
+        <li><strong>Combine RUN commands</strong> — each RUN creates a layer. Chain commands with <code>&amp;&amp;</code> and clean up in the same layer:</li>
+      </ol>
+      <div class="cb"><div class="cb-hdr">efficient RUN</div><pre>RUN apt-get update \
+    &amp;&amp; apt-get install -y curl \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*   # clean in same layer!</pre></div>
+      <ol start="4">
+        <li><strong>.dockerignore</strong> — exclude <code>node_modules/</code>, <code>.git/</code>, test files, local env files.</li>
+        <li><strong>Don't install debug tools</strong> in production images — no curl, wget, bash unless needed.</li>
+        <li><strong>Specific COPY</strong> — copy only what the app needs, not the whole repo root.</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Difference between COPY and ADD in Docker</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>COPY</th><th>ADD</th></tr>
+        <tr><td>Basic copy</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Tar extraction</td><td>No</td><td>Yes — auto-extracts tar.gz</td></tr>
+        <tr><td>Remote URLs</td><td>No</td><td>Yes — downloads from HTTP</td></tr>
+        <tr><td>Recommendation</td><td>Preferred</td><td>Use only when you need tar/URL</td></tr>
+      </table>
+      <div class="tip info"><strong>Best practice:</strong> always use COPY unless you specifically need ADD's extra features. ADD's auto-extraction can be surprising and unpredictable.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What does the CMD instruction do in Docker?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Defines the default command that runs when a container starts. Can be overridden at <code>docker run</code> time.</p>
+      <ul>
+        <li><strong>Shell form:</strong> <code>CMD npm start</code> — runs as <code>/bin/sh -c "npm start"</code>. Process doesn't receive Unix signals (SIGTERM) properly.</li>
+        <li><strong>Exec form (preferred):</strong> <code>CMD ["node", "server.js"]</code> — process runs directly, receives signals, enables graceful shutdown.</li>
+      </ul>
+      <p><strong>CMD vs ENTRYPOINT:</strong> ENTRYPOINT defines the fixed executable; CMD provides default arguments to it. If both are set, CMD args are appended to ENTRYPOINT.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What is Docker Compose and when do you use it?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Tool for defining and running multi-container applications via a <code>docker-compose.yml</code> file. One command (<code>docker compose up</code>) starts your whole stack — app + database + cache + any other services.</p>
+      <p><strong>Use for:</strong> local development and testing. Not for production — use Kubernetes for production orchestration.</p>
+      <p>Services communicate using their service names as DNS hostnames (Docker manages an internal DNS). Volumes are shared between services.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Difference between Docker and Kubernetes</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Docker</th><th>Kubernetes</th></tr>
+        <tr><td>What it does</td><td>Builds and runs containers</td><td>Orchestrates containers across many hosts</td></tr>
+        <tr><td>Scope</td><td>Single host</td><td>Cluster of nodes</td></tr>
+        <tr><td>Auto-restart</td><td>No (docker restart policy only)</td><td>Yes — self-healing controllers</td></tr>
+        <tr><td>Auto-scaling</td><td>No</td><td>Yes — HPA, Karpenter</td></tr>
+        <tr><td>Load balancing</td><td>No</td><td>Yes — Services, Ingress</td></tr>
+        <tr><td>Rolling updates</td><td>No</td><td>Yes — Deployments</td></tr>
+      </table>
+      <p>K8s uses Docker (or containerd) to <em>run</em> containers, then manages them at scale — scheduling, health, networking, storage.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Docker commands to check container resource utilization</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <div class="cb"><div class="cb-hdr">docker resource commands</div><pre>docker stats                  # live CPU, MEM, NET I/O, BLOCK I/O per container
+docker stats --no-stream      # one-time snapshot (good for scripts)
+docker top &lt;container&gt;        # processes running inside a container
+docker inspect &lt;container&gt;   # full config including memory/CPU limits
+docker system df              # disk usage: images, containers, volumes, build cache</pre></div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Docker cp — copy files between container and host</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Copy files or directories between a running (or stopped) container and the host filesystem.</p>
+      <div class="cb"><div class="cb-hdr">docker cp</div><pre>docker cp container_name:/app/logs/error.log ./local-error.log   # container → host
+docker cp ./config.yaml container_name:/app/config/config.yaml   # host → container</pre></div>
+      <div class="tip warn">Docker cp doesn't reflect real-time changes. For live config updates, prefer environment variables, ConfigMaps (in K8s), or volume mounts rather than copying files in at runtime.</div>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- AWS SERVICES                               -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="aws">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--orange)"></span>
+    <span class="cat-title">AWS Services</span>
+    <span class="cat-n">16 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">EC2 is in a private subnet — how do you make it publicly accessible?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Best practice: don't expose the EC2 directly.</strong> Put a load balancer in public subnets in front of it:</p>
+      <ul>
+        <li>Deploy an <strong>ALB</strong> in public subnets (subnets with an IGW route).</li>
+        <li>Create a target group pointing to the private EC2.</li>
+        <li>ALB listener forwards inbound traffic to the EC2 — the EC2 stays private.</li>
+      </ul>
+      <p><strong>For SSH/admin access:</strong> use AWS Systems Manager Session Manager — no public IP needed, no bastion host, full CloudTrail audit log.</p>
+      <p><strong>If you must expose directly:</strong> move to a public subnet and assign an Elastic IP, or add an IGW route + public IP. Not recommended for production.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Internet Gateway vs NAT Gateway vs NAT Instance</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Internet Gateway</th><th>NAT Gateway</th><th>NAT Instance</th></tr>
+        <tr><td>Direction</td><td>Bidirectional</td><td>Outbound only</td><td>Outbound only</td></tr>
+        <tr><td>Who uses it</td><td>Public subnet resources</td><td>Private subnet resources</td><td>Private subnet resources</td></tr>
+        <tr><td>Managed</td><td>Yes (AWS)</td><td>Yes (AWS)</td><td>No — you manage the EC2</td></tr>
+        <tr><td>HA</td><td>Built-in</td><td>Per-AZ (create one per AZ)</td><td>Manual setup required</td></tr>
+        <tr><td>Cost</td><td>Free</td><td>Per hour + data</td><td>EC2 cost only (cheaper)</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">EC2 needs to fetch data from S3 — how? (VPC endpoint + IAM role)</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Two recommended approaches — use both together for best security and cost:</p>
+      <ul>
+        <li><strong>IAM Role / Instance Profile:</strong> attach an IAM role to the EC2 with S3 read permissions. The EC2 automatically gets temporary credentials via the instance metadata service (IMDS). No credentials stored on disk. Best practice.</li>
+        <li><strong>VPC Gateway Endpoint for S3:</strong> add a gateway endpoint to your VPC route table. Traffic to S3 stays within the AWS network — doesn't go through NAT Gateway or internet. Free to use. Eliminates NAT Gateway data charges for S3 traffic.</li>
+      </ul>
+      <div class="tip warn"><strong>Never do this:</strong> store <code>AWS_ACCESS_KEY_ID</code> / <code>AWS_SECRET_ACCESS_KEY</code> on the EC2 instance. If the instance is compromised, those credentials are stolen and can't be automatically rotated.</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What is an Instance Profile?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>A container for an IAM role that can be attached to an EC2 instance. When you "attach an IAM role to EC2" in the console, you're technically attaching an Instance Profile that wraps that role.</p>
+      <ul>
+        <li>Credentials are automatically rotated by the metadata service every few hours.</li>
+        <li>The EC2 can call <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/&lt;role-name&gt;</code> to get current credentials (AWS SDKs do this automatically).</li>
+        <li>In Terraform: create <code>aws_iam_role</code> → <code>aws_iam_instance_profile</code> → attach to <code>aws_instance</code> via <code>iam_instance_profile</code>.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Security Groups vs NACLs — differences</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Security Group</th><th>NACL</th></tr>
+        <tr><td>Level</td><td>Instance (ENI)</td><td>Subnet</td></tr>
+        <tr><td>State</td><td>Stateful — return traffic auto-allowed</td><td>Stateless — must allow inbound AND outbound separately</td></tr>
+        <tr><td>Rules</td><td>Allow only</td><td>Allow AND Deny</td></tr>
+        <tr><td>Rule evaluation</td><td>All rules evaluated together</td><td>Lowest rule number wins (first match)</td></tr>
+        <tr><td>Default</td><td>Deny all inbound, allow all outbound</td><td>Allow all inbound and outbound</td></tr>
+        <tr><td>Use for</td><td>Instance-level fine-grained control</td><td>Subnet-level blocking (e.g. block malicious IP ranges)</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">ALB vs NLB — when do you use each?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>ALB</th><th>NLB</th></tr>
+        <tr><td>Layer</td><td>Layer 7 (HTTP/HTTPS)</td><td>Layer 4 (TCP/UDP/TLS)</td></tr>
+        <tr><td>Routing</td><td>Path-based, host-based, header-based</td><td>Port-based only</td></tr>
+        <tr><td>Performance</td><td>~1ms latency</td><td>Ultra-low latency, millions req/sec</td></tr>
+        <tr><td>Static IPs</td><td>No</td><td>Yes (or Elastic IPs)</td></tr>
+        <tr><td>WAF support</td><td>Yes</td><td>No</td></tr>
+        <tr><td>Use for</td><td>Web apps, microservices, REST APIs, K8s Ingress</td><td>Gaming, IoT, databases, gRPC, anything non-HTTP</td></tr>
+      </table>
+      <p>In EKS: Ingress → creates ALB (via AWS Load Balancer Controller). <code>type: LoadBalancer</code> service → creates NLB.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Cross-zone load balancing — what is it?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Without cross-zone:</strong> each load balancer node only distributes traffic to targets in its own AZ. If AZ-A has 2 targets and AZ-B has 8 targets, AZ-A targets get 4× more traffic each.</p>
+      <p><strong>With cross-zone:</strong> each LB node distributes traffic evenly across all targets in all AZs — true even distribution regardless of AZ target count.</p>
+      <ul>
+        <li><strong>ALB:</strong> enabled by default, no extra charge.</li>
+        <li><strong>NLB:</strong> disabled by default. Enabling incurs cross-AZ data transfer charges.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">S3 — Legal Hold, Retention, Bucket Policy, ACLs, Canonical ID</span><span class="diff hard">Hard</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <h4>Object Lock (S3)</h4>
+      <ul>
+        <li><strong>Retention Period:</strong> prevents object deletion or overwrite for a fixed period. Can be <em>extended</em> but <strong>never shortened</strong> (even by root). Two modes: Governance (admin with special permission can bypass), Compliance (nobody can override — not even root).</li>
+        <li><strong>Legal Hold:</strong> indefinite lock with no expiry date. Toggle on/off independently of retention. Removed by someone with <code>s3:PutObjectLegalHold</code> permission.</li>
+      </ul>
+      <h4>Access control</h4>
+      <ul>
+        <li><strong>Bucket Policy:</strong> resource-based JSON policy on the bucket. Can allow access from other AWS accounts, services, or based on conditions. Most flexible — AWS recommends using this.</li>
+        <li><strong>ACLs:</strong> older per-object or bucket-level permissions. AWS now recommends disabling ACLs and using bucket policies instead. Object Ownership setting controls this.</li>
+        <li><strong>Canonical ID:</strong> a long unique alphanumeric string identifying an AWS account. Used in cross-account ACL grants when you don't want to expose account IDs or email addresses.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">EBS volume types — what are they based on?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th>Type</th><th>Media</th><th>Use case</th></tr>
+        <tr><td>gp3</td><td>SSD</td><td>General purpose. 3000 IOPS baseline (configurable). Cheaper than gp2. Default choice.</td></tr>
+        <tr><td>gp2</td><td>SSD</td><td>Older general purpose. IOPS scales with size (3 IOPS/GB). Replaced by gp3.</td></tr>
+        <tr><td>io2 / io1</td><td>SSD</td><td>Provisioned IOPS. Up to 64,000 IOPS. For databases needing consistent low latency.</td></tr>
+        <tr><td>st1</td><td>HDD</td><td>Throughput-optimized. Big data, log processing, sequential reads. Cannot be boot volume.</td></tr>
+        <tr><td>sc1</td><td>HDD</td><td>Cold storage. Infrequently accessed data. Lowest cost EBS.</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">CloudWatch Composite Alarms — what are they?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Combine multiple CloudWatch alarms using boolean logic (AND, OR, NOT) to create a single alarm state.</p>
+      <p><strong>Example:</strong> fire only when BOTH <code>HighCPU AND HighLatency</code> are in ALARM state — reduces false positives from CPU spikes that don't actually affect users.</p>
+      <p><strong>Use case:</strong> suppress alert noise. Instead of getting paged for every individual metric spike, only alert when multiple symptoms occur together — indicating a real incident vs a transient blip.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">CloudFormation Drift vs Change Sets</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Drift Detection:</strong> someone manually changed a resource outside CloudFormation (via console or CLI). CFT detects this as drift. Stack → Detect Drift → shows which resources differ from the CFT template and how. Fix by either importing the change into the template or reverting the manual change.</li>
+        <li><strong>Change Set:</strong> a preview of what will change before you execute a stack update. Like <code>terraform plan</code>. Shows resources that will be Added / Modified / Removed. Execute the change set to apply. Never update a production stack without reviewing a change set first.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Assume Role (STS) — what is it and when do you use it?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><code>sts:AssumeRole</code> allows a principal (IAM user, service, another role, EC2, Lambda) to temporarily take on another IAM role and receive short-lived credentials with that role's permissions.</p>
+      <p><strong>Use cases:</strong></p>
+      <ul>
+        <li><strong>Cross-account access:</strong> your account assumes a role in another account to deploy resources or read data.</li>
+        <li><strong>CI/CD:</strong> GitHub Actions OIDC assumes a deployment role — no long-lived access keys stored in GitHub.</li>
+        <li><strong>EKS IRSA:</strong> pod service account assumes an IAM role to access AWS services without EC2 instance credentials.</li>
+        <li><strong>Least privilege:</strong> human users assume elevated roles only when needed, for limited duration (1-12 hours).</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Parameter Store vs Secrets Manager</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Parameter Store</th><th>Secrets Manager</th></tr>
+        <tr><td>Cost</td><td>Free (standard), $0.05/10k API calls (advanced)</td><td>$0.40/secret/month + API call charges</td></tr>
+        <tr><td>Rotation</td><td>Manual only</td><td>Automatic (RDS, Redshift natively)</td></tr>
+        <tr><td>Hierarchy</td><td>Yes — <code>/app/prod/db-host</code></td><td>JSON value in one secret</td></tr>
+        <tr><td>Cross-account</td><td>Via resource policy</td><td>Built-in</td></tr>
+        <tr><td>Use for</td><td>Config values, non-sensitive settings, feature flags</td><td>Passwords, API keys, anything needing auto-rotation</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Transit Gateway vs VPC Peering</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>VPC Peering</th><th>Transit Gateway</th></tr>
+        <tr><td>Topology</td><td>1-to-1 connections</td><td>Hub-and-spoke, centralized</td></tr>
+        <tr><td>Transitive routing</td><td>No — A↔B, B↔C doesn't mean A↔C</td><td>Yes — all attached VPCs can reach each other</td></tr>
+        <tr><td>Scale</td><td>Gets complex with many VPCs (N×(N-1)/2 peerings)</td><td>Thousands of VPCs, VPNs, Direct Connect</td></tr>
+        <tr><td>Cost</td><td>Data transfer charges only</td><td>Attachment cost + data transfer</td></tr>
+        <tr><td>Use for</td><td>Simple 2-3 VPC connections</td><td>Complex multi-account, multi-VPC, hybrid architectures</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Connect to an ECS Fargate container — ECS Exec</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Use <strong>Amazon ECS Exec</strong> — equivalent of <code>kubectl exec</code> for ECS. Powered by AWS Systems Manager Session Manager.</p>
+      <div class="cb"><div class="cb-hdr">ECS Exec</div><pre>aws ecs execute-command \
+  --cluster my-cluster \
+  --task &lt;task-id&gt; \
+  --container &lt;container-name&gt; \
+  --interactive \
+  --command "/bin/sh"</pre></div>
+      <p><strong>Prerequisites:</strong> SSM Session Manager plugin installed locally, ECS task role must have SSM permissions (<code>ssmmessages:*</code>), service must have <code>enableExecuteCommand: true</code>.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Amazon Glue, Kinesis, CloudFront, AWS Config — brief overview</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Amazon Glue:</strong> serverless ETL service. Crawlers scan data sources (S3, RDS) and build a Data Catalog (schema). ETL jobs (Python/Spark) transform raw data for analytics. Used in data pipelines feeding Athena or Redshift.</li>
+        <li><strong>Kinesis Data Streams:</strong> real-time data streaming. Producers push records (logs, events, metrics); consumers (Lambda, EC2) read them in order. Retention 1–365 days. Use when you need real-time, ordered processing.</li>
+        <li><strong>Kinesis Firehose:</strong> fully managed delivery pipeline — stream → S3, Redshift, OpenSearch. No consumer code needed. Buffers and batches automatically.</li>
+        <li><strong>CloudFront:</strong> CDN. Caches content at edge locations globally. Origins: S3, ALB, EC2, API Gateway. Path-based behaviors, WAF integration, OAC for private S3. ACM certs for CloudFront <em>must</em> be in <code>us-east-1</code>.</li>
+        <li><strong>AWS Config:</strong> records configuration changes to AWS resources over time. Evaluate resources against compliance rules. Useful for auditing "who changed this security group and when." Not real-time monitoring — use CloudTrail + CloudWatch for that.</li>
+      </ul>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- NETWORKING & DNS                           -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="net">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--purple)"></span>
+    <span class="cat-title">Networking &amp; DNS</span>
+    <span class="cat-n">6 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">How does DNS routing work? Walk me through a request.</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ol>
+        <li>User types <code>example.com</code> in browser.</li>
+        <li>Browser checks its local DNS cache. If found and TTL not expired → done.</li>
+        <li>OS checks <code>/etc/hosts</code>, then system resolver cache.</li>
+        <li>Query goes to the <strong>Recursive Resolver</strong> (configured DNS server — ISP, 8.8.8.8, etc.).</li>
+        <li>Resolver doesn't know <code>example.com</code>. Asks a <strong>Root Nameserver</strong> (<code>.</code>) → "who handles <code>.com</code>?"</li>
+        <li>Root nameserver returns the address of the <strong>.com TLD nameserver</strong>.</li>
+        <li>Resolver asks the TLD nameserver → "who's authoritative for <code>example.com</code>?"</li>
+        <li>TLD returns the <strong>authoritative nameserver</strong> for <code>example.com</code>.</li>
+        <li>Resolver asks the authoritative nameserver → gets the A record (IP address).</li>
+        <li>Resolver returns IP to client, caches it for the TTL duration. Browser connects to the IP.</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">VPC Traffic Flow — how does traffic move through a VPC?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Internet → Public subnet EC2:</strong> Internet → IGW → Route table (<code>0.0.0.0/0 → igw</code>) → Subnet NACL → Security Group → EC2.</li>
+        <li><strong>Private subnet EC2 → Internet (outbound):</strong> EC2 → Route table (<code>0.0.0.0/0 → nat-gw</code>) → NAT Gateway (in public subnet) → IGW → Internet.</li>
+        <li><strong>EC2 to EC2 (same VPC):</strong> via the VPC local route (<code>10.0.0.0/16 → local</code>). Stays within the VPC network, no external hops.</li>
+        <li><strong>EC2 to S3 (with VPC endpoint):</strong> via the gateway endpoint — route table entry <code>pl-xxx (S3 prefix list) → vpce-xxx</code>. Never leaves AWS network.</li>
+      </ul>
+      <p>Each hop evaluates: Route Table → NACL (subnet-level, stateless) → Security Group (instance-level, stateful).</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Ingress and Target Groups in Kubernetes/AWS</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Kubernetes Ingress:</strong> an API object that defines HTTP/HTTPS routing rules into cluster services. Rules: host + path → service. Requires an <em>Ingress Controller</em> (nginx, AWS ALB Ingress Controller) to actually implement the rules as a real load balancer.</p>
+      <p><strong>AWS Target Group:</strong> a set of registered targets (EC2 instances, IP addresses, Lambda functions, ECS tasks) that an ALB routes traffic to. Each target group has its own health check settings. ALB listener rules forward to target groups.</p>
+      <p><strong>How they connect in EKS:</strong> an Ingress resource → AWS Load Balancer Controller creates an ALB → registers pods as IP targets in a target group. Pod IP is the target, not the node IP (in IP target mode).</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Route53 routing policies — latency, geolocation, weighted</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th>Policy</th><th>Routes to…</th><th>Use case</th></tr>
+        <tr><td>Simple</td><td>Single resource</td><td>Basic DNS, no health checks</td></tr>
+        <tr><td>Weighted</td><td>Split by % (10% to v2, 90% to v1)</td><td>Canary deployments, A/B testing</td></tr>
+        <tr><td>Latency</td><td>AWS region with lowest latency</td><td>Multi-region app — serve users from nearest region</td></tr>
+        <tr><td>Failover</td><td>Primary unless health check fails → secondary</td><td>Active-passive disaster recovery</td></tr>
+        <tr><td>Geolocation</td><td>Based on user's country/continent</td><td>Compliance (EU users to EU region), localization</td></tr>
+        <tr><td>Geoproximity</td><td>Based on location + configurable bias</td><td>Fine-tune geographic routing, shift traffic between regions</td></tr>
+        <tr><td>Multivalue</td><td>Multiple IPs (up to 8), with health checks</td><td>Simple load distribution at DNS level</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">VPC default resources — what does AWS create automatically?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>When you create any VPC:</strong></p>
+      <ul>
+        <li>Default <strong>Security Group</strong> — allows all traffic from within the same SG, denies all inbound from outside.</li>
+        <li>Default <strong>NACL</strong> — allows ALL inbound and outbound traffic (rule 100 allow *).</li>
+        <li>Default <strong>Route Table</strong> — contains the local route for the VPC CIDR.</li>
+      </ul>
+      <p><strong>The default VPC (pre-created per account per region) also has:</strong> an Internet Gateway attached, a public subnet in each AZ with auto-assign public IP enabled, and a route table entry <code>0.0.0.0/0 → igw</code>.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Hybrid connectivity — how do you connect on-premises to AWS?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>VPN (Site-to-Site):</strong> encrypted IPsec tunnel over the public internet. Quick to set up (~hours). Bandwidth limited (~1.25 Gbps). Variable latency. Good for lower-bandwidth or quick connectivity needs.</li>
+        <li><strong>Direct Connect:</strong> dedicated private fiber connection from on-premises to AWS. 1–100 Gbps. Consistent, low latency. Takes weeks to provision. Best for high-bandwidth, latency-sensitive workloads.</li>
+        <li><strong>Transit Gateway:</strong> hub to connect multiple VPCs and on-premises networks. VPN or Direct Connect attaches to TGW, then all VPCs connected to TGW can reach on-premises.</li>
+      </ul>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CI/CD & DEPLOYMENTS                        -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="cicd">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--green)"></span>
+    <span class="cat-title">CI/CD &amp; Deployments</span>
+    <span class="cat-n">5 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">Walk me through a Jenkins pipeline you created</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <div class="cb"><div class="cb-hdr">Declarative pipeline structure</div><pre>pipeline {
+  agent any
+  environment {
+    IMAGE = "my-registry/myapp:${BUILD_NUMBER}"
+  }
+  stages {
+    stage('Checkout')   { steps { checkout scm } }
+    stage('Test')       { steps { sh 'npm test' } }
+    stage('Build')      { steps { sh "docker build -t ${IMAGE} ." } }
+    stage('Push')       { steps { sh "docker push ${IMAGE}" } }
+    stage('Deploy')     {
+      steps { sh "kubectl set image deployment/app app=${IMAGE}" }
+    }
+  }
+  post {
+    failure { slackSend message: "Build failed: ${env.JOB_NAME} #${BUILD_NUMBER}" }
+    success { echo "Deployed ${IMAGE}" }
+  }
+}</pre></div>
+      <h4>Connecting Bitbucket to Jenkins</h4>
+      <ul>
+        <li>In Jenkins: add Bitbucket credentials (app password or SSH key) in Credentials Manager.</li>
+        <li>Create a Multibranch Pipeline or Pipeline job pointing to the Bitbucket repo URL.</li>
+        <li>In Bitbucket: add a webhook pointing to <code>https://&lt;jenkins-url&gt;/bitbucket-hook/</code> — triggers a build on push.</li>
+        <li>Jenkins polls Bitbucket or receives the webhook, checks out the latest code (including the YAML config file), and runs the pipeline.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Blue-Green vs Canary deployment — differences and trade-offs</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Blue-Green</th><th>Canary</th></tr>
+        <tr><td>How it works</td><td>Full copy of prod (green), switch LB/DNS all at once</td><td>Gradually shift % of traffic to new version</td></tr>
+        <tr><td>Traffic split</td><td>0% → 100% instantly</td><td>1% → 5% → 25% → 100% over time</td></tr>
+        <tr><td>Rollback speed</td><td>Instant — switch LB back to blue</td><td>Fast — route traffic back to old version</td></tr>
+        <tr><td>Infrastructure cost</td><td>2× (two full environments)</td><td>Low (small % of instances)</td></tr>
+        <tr><td>Blast radius on failure</td><td>100% if green fails after full switch</td><td>Low — only the canary % affected</td></tr>
+        <tr><td>Best for</td><td>Major releases, database schema changes, instant cutover</td><td>Continuous delivery, testing with real users at low risk</td></tr>
+      </table>
+      <div class="tip info"><strong>Combining both:</strong> use blue-green infrastructure (two environments) but do canary traffic shifting — send 5% to green, monitor, then shift 100%. Instant rollback (LB switch) + risk reduction (gradual).</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How do you split weighted traffic in AWS?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Route53 Weighted Routing:</strong> two DNS records with the same name, different weights. DNS-level traffic splitting. Good for routing between regions or environments.</li>
+        <li><strong>ALB weighted target groups:</strong> an ALB listener rule can forward to multiple target groups with specified weights. E.g. 90% to v1 target group, 10% to v2 target group.</li>
+        <li><strong>Argo Rollouts (K8s):</strong> progressive canary delivery controller. Automatically shifts traffic percentage, runs analysis jobs (error rate, latency), auto-promotes or rolls back.</li>
+        <li><strong>Istio/service mesh:</strong> VirtualService with weighted routes between service versions within the cluster.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What are your day-to-day responsibilities as a DevOps engineer?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Infrastructure management:</strong> maintaining Terraform modules, reviewing plan outputs, applying changes via CI/CD pipelines.</li>
+        <li><strong>CI/CD pipeline maintenance:</strong> keeping build pipelines healthy, updating GitHub Actions workflows, debugging build failures.</li>
+        <li><strong>Kubernetes operations:</strong> reviewing deployments, investigating pod failures, managing resource quotas, upgrading cluster components.</li>
+        <li><strong>Monitoring and alerting:</strong> responding to alerts, tuning alert thresholds, creating dashboards, ensuring observability coverage for new services.</li>
+        <li><strong>Incident response:</strong> being on-call rotation, triaging alerts, coordinating rollbacks or fixes, writing post-mortems.</li>
+        <li><strong>Collaboration:</strong> reviewing PRs for infra changes, helping dev teams with deployment issues, documenting runbooks.</li>
+        <li><strong>Cost optimization:</strong> reviewing cloud spend, identifying unused resources, rightsizing instances.</li>
+        <li><strong>Security:</strong> reviewing IAM policies, rotating credentials, scanning images for vulnerabilities.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Automation &amp; Tooling — how do you identify and build automation?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Identifying opportunities:</strong> any task you do more than twice manually is a candidate. Look for: repeated CLI commands, copy-paste Terraform, manual deployments, frequent on-call runbook steps.</p>
+      <p><strong>Self-healing systems:</strong> K8s liveness/readiness probes restart unhealthy pods. HPA scales pods on load. Karpenter provisions/terminates nodes automatically. CloudWatch alarms trigger Lambda to auto-remediate (e.g., restart ECS task, snapshot EBS before resize).</p>
+      <p><strong>Tools:</strong> Terraform (IaC), GitHub Actions/Jenkins (CI/CD), Ansible (config management), AWS Lambda (event-driven automation), EventBridge (schedule or respond to AWS events).</p>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MONITORING & SRE                           -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="obs">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--pink)"></span>
+    <span class="cat-title">Monitoring &amp; SRE</span>
+    <span class="cat-n">6 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">Difference between Monitoring, Logging, and Tracing</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Monitoring</th><th>Logging</th><th>Tracing</th></tr>
+        <tr><td>What</td><td>Numeric metrics over time</td><td>Discrete timestamped events</td><td>Request journey across services</td></tr>
+        <tr><td>Answers</td><td>"Is the system healthy?"</td><td>"What happened?"</td><td>"Why is it slow?"</td></tr>
+        <tr><td>Examples</td><td>CPU 80%, error rate 2%, p99 latency 340ms</td><td>ERROR: DB connection refused at 14:32:05</td><td>Request took 800ms: 10ms API → 790ms DB query</td></tr>
+        <tr><td>Tools</td><td>Prometheus, CloudWatch, Datadog</td><td>CloudWatch Logs, Loki, ELK Stack</td><td>AWS X-Ray, Jaeger, Zipkin</td></tr>
+        <tr><td>When to use</td><td>Alerting, dashboards, capacity planning</td><td>Debugging, auditing, compliance</td><td>Diagnosing latency in distributed systems</td></tr>
+      </table>
+      <p>Together they form <strong>Observability</strong> — the three pillars: Metrics, Logs, Traces.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Key metrics for service reliability — what do you monitor and prioritize?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>The Four Golden Signals (Google SRE):</strong></p>
+      <ul>
+        <li><strong>Latency:</strong> time to serve a request. Measure p50, p95, p99 — never just the average. One slow request hides in the average.</li>
+        <li><strong>Traffic:</strong> requests per second, transactions per second — how much demand is on the system.</li>
+        <li><strong>Errors:</strong> rate of failed requests (5xx responses, failed transactions). The most user-visible signal.</li>
+        <li><strong>Saturation:</strong> how full is the system? CPU, memory, queue depth, disk. Saturation predicts future degradation.</li>
+      </ul>
+      <p><strong>Prioritization:</strong> alert on symptoms (high error rate, high latency) not causes (high CPU). A CPU spike that doesn't affect users isn't an emergency. If error rate is fine, the high CPU can wait for business hours.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">SLI, SLO, SLA — what are they and why do they matter?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>SLI (Service Level Indicator):</strong> a specific metric measuring service behavior. Example: "percentage of requests completed in under 200ms over the last 30 days."</li>
+        <li><strong>SLO (Service Level Objective):</strong> the target for an SLI. Example: "99.9% of requests must complete in under 200ms." Your internal engineering target.</li>
+        <li><strong>SLA (Service Level Agreement):</strong> a contract with customers with financial consequences if violated. Usually looser than SLO — your internal target should be stricter than what you promise customers.</li>
+      </ul>
+      <p><strong>Error budget</strong> = 1 - SLO. At 99.9% SLO: 0.1% budget = ~43 minutes downtime/month. When the error budget is nearly exhausted, freeze new deployments and focus on reliability. Error budget protects reliability without blocking all progress.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How would you handle a latency spike on a critical application?</span><span class="diff hard">Hard</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ol>
+        <li><strong>Triage scope:</strong> is it all requests or specific endpoints? All users or a region? Check load balancer access logs for which paths are slow.</li>
+        <li><strong>Check recent changes:</strong> any deployments in the last hour? Terraform applies? Config changes? Roll back if correlated.</li>
+        <li><strong>Resource bottleneck:</strong> CPU, memory, network I/O on application pods and database. <code>kubectl top pods</code>, CloudWatch metrics.</li>
+        <li><strong>Database:</strong> most latency spikes trace back to slow queries, lock contention, or connection pool exhaustion. Check DB slow query log, active connections, wait events.</li>
+        <li><strong>Downstream dependencies:</strong> check if a downstream service is slow or returning errors. Distributed tracing (X-Ray) shows where time is spent.</li>
+        <li><strong>Scaling:</strong> if traffic spiked, scale out pods (HPA) or add read replicas to relieve DB load.</li>
+        <li><strong>Communicate:</strong> update incident channel with findings every 15-20 minutes. Don't go dark while investigating.</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How do you conduct a post-incident review (post-mortem)?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Key principle:</strong> blameless. The goal is systemic improvement, not finding someone to blame.</p>
+      <ul>
+        <li><strong>Timeline:</strong> reconstruct a minute-by-minute timeline of what happened, when it was detected, and when it was resolved.</li>
+        <li><strong>Impact:</strong> quantify — how many users affected, what revenue/operations impact, how long.</li>
+        <li><strong>Root cause:</strong> use "5 Whys" to go beyond the immediate cause to the underlying systemic issue. Not "the pod crashed" — why did it crash? Why didn't monitoring catch it earlier?</li>
+        <li><strong>Contributing factors:</strong> what conditions made the incident possible or made it worse?</li>
+        <li><strong>Action items:</strong> specific, owned, time-bound improvements. "Add DB connection pool monitoring by Friday (Owner: @name)." Not vague items like "improve monitoring."</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Scalability — horizontal vs vertical scaling, designing for high traffic</span><span class="diff sys">System Design</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Horizontal (scale out)</th><th>Vertical (scale up)</th></tr>
+        <tr><td>How</td><td>Add more instances/pods</td><td>Bigger instance (more CPU/RAM)</td></tr>
+        <tr><td>Limit</td><td>Theoretically unlimited</td><td>Capped by largest available instance</td></tr>
+        <tr><td>Downtime</td><td>None (add alongside existing)</td><td>Usually requires restart</td></tr>
+        <tr><td>Cost</td><td>Linear with load</td><td>Exponential at high tier</td></tr>
+        <tr><td>Use for</td><td>Stateless services, web tiers</td><td>Databases, caches (hard to shard), quick fix</td></tr>
+      </table>
+      <h4>Designing for high traffic with low latency</h4>
+      <ul>
+        <li>Stateless app tier → horizontal scaling with HPA or Karpenter</li>
+        <li>CDN (CloudFront) for static assets — offload origin</li>
+        <li>Database read replicas for read-heavy workloads</li>
+        <li>Caching (ElastiCache) for repeated queries</li>
+        <li>Async processing (SQS/Kinesis) for non-real-time work</li>
+        <li>Multi-AZ deployment for availability, multi-region for latency</li>
+      </ul>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TERRAFORM & IaC                            -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="iac">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--emerald)"></span>
+    <span class="cat-title">Terraform &amp; IaC</span>
+    <span class="cat-n">3 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">Terraform variable precedence — .tf file, tfvars, JSON, CLI flags</span><span class="diff hard">Hard</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>From <strong>lowest priority</strong> to <strong>highest priority</strong> (later sources override earlier ones):</p>
+      <ol class="prec">
+        <li>Default values in <code>variable</code> blocks in <code>.tf</code> files <span class="prec-arrow">lowest</span></li>
+        <li><code>terraform.tfvars</code> file (auto-loaded)</li>
+        <li><code>terraform.tfvars.json</code> file (auto-loaded)</li>
+        <li><code>*.auto.tfvars</code> and <code>*.auto.tfvars.json</code> files (alphabetical order)</li>
+        <li><code>TF_VAR_*</code> environment variables</li>
+        <li><code>-var-file=&lt;file&gt;</code> flag on CLI</li>
+        <li><code>-var="key=value"</code> flag on CLI <span class="prec-arrow">highest</span></li>
+      </ol>
+      <div class="tip good"><strong>Interview answer:</strong> "CLI flags always win. tfvars files are loaded automatically. The variable block default is only used if nothing else sets the value."</div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Cloud architecting — reliability strategies</span><span class="diff sys">System Design</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>Multi-AZ:</strong> spread resources across 2+ AZs. Survive AZ failure with automatic failover (RDS Multi-AZ, NLB, EKS managed node groups).</li>
+        <li><strong>Multi-region:</strong> for disaster recovery or latency. Active-active (both regions serve traffic) or active-passive (failover to second region).</li>
+        <li><strong>Immutable infrastructure:</strong> never patch running servers — replace them. Bake AMIs/container images, roll out new ones, terminate old ones.</li>
+        <li><strong>Infrastructure as Code:</strong> all resources defined in Terraform/CFT. Enables consistent recreation, audit trail, and peer review of changes.</li>
+        <li><strong>Circuit breakers:</strong> stop calling a failing service. Let it recover instead of cascading failures. Tools: Istio, Resilience4j.</li>
+        <li><strong>Health checks everywhere:</strong> ALB target health, K8s readiness/liveness probes, RDS enhanced monitoring.</li>
+        <li><strong>Backup and recovery testing:</strong> automated backups aren't enough — regularly test restore procedures.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">What would you do first in a pod/server crash — rollback or fix?</span><span class="diff hard">Hard</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Rollback first, in almost every case.</strong></p>
+      <ul>
+        <li>The primary objective in an incident is to restore service — minimize MTTR (Mean Time to Recovery).</li>
+        <li>A broken system while you're still debugging extends the outage for users.</li>
+        <li>Rollback is fast and predictable. Finding the root cause takes unknown time.</li>
+        <li>You can safely debug the rolled-back version <em>after</em> the incident is over.</li>
+      </ul>
+      <p><strong>When to fix instead of rollback:</strong></p>
+      <ul>
+        <li>The fix is a one-line change and faster than a rollback.</li>
+        <li>Rollback would cause data loss (e.g. DB migration already ran and can't be reversed).</li>
+        <li>No stable previous version exists to roll back to.</li>
+        <li>The issue isn't deployment-related (infra failure, dependency outage).</li>
+      </ul>
+      <div class="tip good"><strong>Standard sequence:</strong> rollback → restore service → write incident notes → root cause analysis → proper fix → staged deploy with monitoring.</div>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECURITY & IAM                             -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="security">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--amber)"></span>
+    <span class="cat-title">Security &amp; IAM</span>
+    <span class="cat-n">3 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">Authentication vs Authorization</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Authentication (AuthN)</th><th>Authorization (AuthZ)</th></tr>
+        <tr><td>Question</td><td>"Who are you?"</td><td>"What are you allowed to do?"</td></tr>
+        <tr><td>Verifies</td><td>Identity</td><td>Permissions</td></tr>
+        <tr><td>Happens</td><td>First</td><td>Second (after identity confirmed)</td></tr>
+        <tr><td>K8s example</td><td>kubeconfig certificates / OIDC token</td><td>RBAC — Roles and Bindings</td></tr>
+        <tr><td>AWS example</td><td>IAM user password / access key / SSO</td><td>IAM policies — allow/deny on actions and resources</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">SSL/TLS certificates — how do they work?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <ul>
+        <li><strong>What TLS does:</strong> encrypts data in transit between client and server. Prevents eavesdropping and man-in-the-middle attacks.</li>
+        <li><strong>Certificate contains:</strong> server's public key, domain name, issuing CA, validity period, and the CA's digital signature.</li>
+        <li><strong>Chain of trust:</strong> certificate signed by an intermediate CA → signed by a root CA. Browsers trust root CAs built into the OS/browser. If the chain is valid, the cert is trusted.</li>
+        <li><strong>TLS handshake (simplified):</strong> client connects → server presents cert → client verifies cert chain → they negotiate cipher and exchange session keys → encrypted communication begins.</li>
+        <li><strong>In AWS:</strong> ACM (Certificate Manager) issues free managed TLS certs. Handles renewal automatically. CloudFront and ALB integrate directly with ACM. ACM certs for CloudFront must be in <code>us-east-1</code>.</li>
+        <li><strong>Self-signed:</strong> cert signed by itself, not a trusted CA. Browsers show a warning. Acceptable for internal services where you control both sides.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How do you stay motivated and learn new technologies?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p><strong>Tips for answering authentically:</strong></p>
+      <ul>
+        <li>Be specific about how you actually learn — hands-on labs, building side projects, reading release notes, following engineering blogs.</li>
+        <li>Mention the feedback loop: you learn best when there's a real problem to solve, not just reading docs in a vacuum.</li>
+        <li>On motivation: tie it to impact — seeing infrastructure you built handle traffic reliably, or a cost reduction you drove showing up in the bill.</li>
+        <li>On collaboration: give a specific example of a time you helped a teammate or learned from one. Interviewers are checking for team player signals.</li>
+      </ul>
+      <div class="tip info"><strong>Example answer frame:</strong> "I stay current by [specific method: AWS blogs, KubeCon talks, hands-on labs]. When I want to learn something new, I build a small project that forces me to actually use it. I find that working through real problems — even toy ones — sticks better than just reading."</div>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- LINUX & SYSTEMS                            -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="linux">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--slate)"></span>
+    <span class="cat-title">Linux &amp; Systems</span>
+    <span class="cat-n">4 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">top, ps -a, ps aux — what do they show?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <div class="cb"><div class="cb-hdr">process inspection commands</div><pre>top                  # interactive, real-time view sorted by CPU usage
+                     # columns: PID, USER, PR (priority), NI (nice), CPU%, MEM%, COMMAND
+
+ps aux               # snapshot of all processes (a=all users, u=user format, x=no tty)
+                     # shows: USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND
+
+ps -ef               # alternative format, shows PPID (parent process ID)
+ps -a                # processes of all users attached to a terminal
+ps -p 1234           # info for a specific PID
+ps aux | grep nginx  # find a specific process</pre></div>
+      <p>Key <code>top</code> interaction: <code>M</code> sort by memory, <code>P</code> sort by CPU, <code>k</code> kill a process, <code>q</code> quit.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Nice value — what is it, what command, inversely proportional?</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>The nice value controls a process's <strong>CPU scheduling priority</strong>. Range: <code>-20</code> (highest priority) to <code>+19</code> (lowest priority). Default for new processes: <code>0</code>.</p>
+      <p><strong>Inversely proportional to priority:</strong> a <em>lower</em> (more negative) nice value = <em>higher</em> CPU priority. A process with nice -10 gets more CPU time than one with nice +10.</p>
+      <div class="cb"><div class="cb-hdr">nice commands</div><pre>nice -n 10 my-command           # start a process with nice value 10 (lower priority)
+nice -n -5 my-command           # start with nice value -5 (higher priority, needs root)
+renice -n 5 -p 1234             # change nice value of running process (PID 1234)
+renice -n -10 -p 1234           # only root can set negative nice values</pre></div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Hypervisor types — Type 1 vs Type 2, and virtualization</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <table class="tbl">
+        <tr><th></th><th>Type 1 (Bare Metal)</th><th>Type 2 (Hosted)</th></tr>
+        <tr><td>Runs on</td><td>Directly on hardware</td><td>On top of a host OS</td></tr>
+        <tr><td>Performance</td><td>Better — no host OS overhead</td><td>More overhead</td></tr>
+        <tr><td>Examples</td><td>VMware ESXi, Hyper-V, KVM, Xen</td><td>VirtualBox, VMware Workstation</td></tr>
+        <tr><td>Use case</td><td>Production datacenters, cloud providers</td><td>Developer workstations, testing</td></tr>
+      </table>
+      <p>AWS uses <strong>KVM-based Nitro hypervisor</strong> (Type 1). KVM is technically part of the Linux kernel, so the host OS and hypervisor are the same — giving near-bare-metal performance.</p>
+      <p><strong>Virtualization vs Containers:</strong> VMs virtualize hardware (each VM has its own OS kernel). Containers share the host OS kernel — far lighter weight but less isolation.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">Git commands — how to change to a new branch</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <div class="cb"><div class="cb-hdr">git branch commands</div><pre>git checkout -b feature/new-branch    # create and switch to new branch (older syntax)
+git switch -c feature/new-branch      # create and switch (newer syntax, git 2.23+)
+git checkout existing-branch          # switch to existing branch
+git switch existing-branch            # switch to existing branch (newer syntax)
+git branch                            # list local branches
+git branch -a                         # list all branches (local + remote)
+git push -u origin feature/new-branch # push new branch to remote and set upstream</pre></div>
+    </div>
+  </details>
+
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- BEHAVIORAL                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="cat" id="behavioral">
+  <div class="cat-hdr">
+    <span class="cat-dot" style="background:var(--lavender)"></span>
+    <span class="cat-title">Behavioral</span>
+    <span class="cat-n">3 questions</span>
+  </div>
+
+  <details class="qa">
+    <summary><span class="q-text">Implement Bubble Sort (coding question in DevOps interviews)</span><span class="diff med">Medium</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Bubble Sort repeatedly steps through the array, compares adjacent elements, and swaps them if they're in the wrong order. Largest elements "bubble up" to the end each pass.</p>
+      <div class="cb"><div class="cb-hdr">Python</div><pre>def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n - i - 1):   # last i elements already sorted
+            if arr[j] &gt; arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr
+
+print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))
+# [11, 12, 22, 25, 34, 64, 90]</pre></div>
+      <div class="cb"><div class="cb-hdr">Bash (if asked for bash script)</div><pre>#!/bin/bash
+arr=(64 34 25 12 22 11 90)
+n=${#arr[@]}
+for ((i=0; i&lt;n; i++)); do
+  for ((j=0; j&lt;n-i-1; j++)); do
+    if [ ${arr[j]} -gt ${arr[$((j+1))]} ]; then
+      tmp=${arr[j]}; arr[j]=${arr[$((j+1))]}; arr[$((j+1))]=$tmp
+    fi
+  done
+done
+echo "${arr[@]}"</pre></div>
+      <p><strong>Complexity:</strong> O(n²) time, O(1) space. Not efficient for large arrays — just demonstrates basic sorting logic.</p>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">How do you list Docker images?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <div class="cb"><div class="cb-hdr">docker image commands</div><pre>docker images                         # list all local images (REPOSITORY, TAG, IMAGE ID, SIZE)
+docker images -a                      # include intermediate images
+docker images --filter "dangling=true" # untagged (dangling) images
+docker image ls                       # same as docker images
+docker image inspect nginx:latest     # full metadata of a specific image
+docker rmi image-id                   # remove an image
+docker image prune                    # remove all dangling images
+docker image prune -a                 # remove all unused images</pre></div>
+    </div>
+  </details>
+
+  <details class="qa">
+    <summary><span class="q-text">AWS Backup — what is it and when do you use it?</span><span class="diff easy">Easy</span><span class="q-arr">▶</span></summary>
+    <div class="ans">
+      <p>Centralized, policy-driven backup service for AWS resources. Instead of configuring backup schedules individually per service, AWS Backup lets you define a single backup plan that covers multiple resource types.</p>
+      <p><strong>Supported resources:</strong> EBS volumes, RDS databases, DynamoDB tables, EFS file systems, S3 buckets, EC2 instances, Aurora, DocumentDB, Neptune, FSx, Storage Gateway.</p>
+      <p><strong>Key features:</strong> backup plans with CRON schedules, retention policies, cross-region and cross-account copy for DR, point-in-time restore, compliance reporting via AWS Backup Audit Manager.</p>
+      <div class="tip info"><strong>Use when:</strong> you need consistent backup policy across multiple AWS services and accounts, or need to demonstrate compliance (SOC2, HIPAA) with backup controls.</div>
+    </div>
+  </details>
+
+</section>
+
+</main>
+</div>
+
+<script>
+// Search
+const input = document.getElementById('searchInput');
+input.addEventListener('input', () => {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('.qa').forEach(el => {
+    const text = el.querySelector('.q-text').textContent.toLowerCase();
+    el.classList.toggle('hidden', q.length > 1 && !text.includes(q));
+  });
+  document.querySelectorAll('.cat').forEach(sec => {
+    const visible = [...sec.querySelectorAll('.qa')].some(el => !el.classList.contains('hidden'));
+    sec.style.display = visible ? '' : 'none';
+  });
+});
+
+// Active nav on scroll
+const sections = document.querySelectorAll('.cat[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.2 });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

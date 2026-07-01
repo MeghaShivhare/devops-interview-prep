@@ -99,10 +99,12 @@
     .card.karpenter::before  { background: var(--accent); }
     .card.gitops::before     { background: var(--teal); }
     .card.warroom::before    { background: var(--orange); }
+    .card.questions::before  { background: var(--pink); }
 
     .card:hover.karpenter  { border-color: rgba(88,166,255,0.5); }
     .card:hover.gitops     { border-color: rgba(45,212,191,0.5); }
     .card:hover.warroom    { border-color: rgba(240,165,0,0.5); }
+    .card:hover.questions  { border-color: rgba(244,114,182,0.5); }
 
     .card-header {
       display: flex;
@@ -128,6 +130,7 @@
     .karpenter .card-badge  { color: var(--accent); border-color: rgba(88,166,255,0.3); background: rgba(88,166,255,0.08); }
     .gitops    .card-badge  { color: var(--teal);   border-color: rgba(45,212,191,0.3); background: rgba(45,212,191,0.08); }
     .warroom   .card-badge  { color: var(--orange); border-color: rgba(240,165,0,0.3);  background: rgba(240,165,0,0.08); }
+    .questions .card-badge  { color: var(--pink);   border-color: rgba(244,114,182,0.3);background: rgba(244,114,182,0.08); }
 
     .card-desc {
       font-size: 13.5px;
@@ -162,6 +165,7 @@
     .karpenter .card-footer { color: var(--accent); }
     .gitops    .card-footer { color: var(--teal); }
     .warroom   .card-footer { color: var(--orange); }
+    .questions .card-footer { color: var(--pink); }
 
     /* FOOTER */
     footer {
@@ -263,6 +267,28 @@
         <span class="bullet">CI/CD pipelines</span>
         <span class="bullet">STAR stories</span>
         <span class="bullet">Live readiness tracker</span>
+      </div>
+      <div class="card-footer">Open guide →</div>
+    </a>
+
+
+    <a class="card questions" href="interview-questions.html">
+      <div class="card-header">
+        <div class="card-title">Most Asked Interview Questions</div>
+        <span class="card-badge">60+ Q&amp;A</span>
+      </div>
+      <p class="card-desc">
+        60+ real DevOps interview questions with full answers — organized by category with difficulty badges, comparison tables, and code examples. Search by keyword, click to expand.
+      </p>
+      <div class="card-bullets">
+        <span class="bullet">Kubernetes &amp; EKS</span>
+        <span class="bullet">Docker</span>
+        <span class="bullet">AWS Services</span>
+        <span class="bullet">Networking</span>
+        <span class="bullet">CI/CD</span>
+        <span class="bullet">Monitoring &amp; SRE</span>
+        <span class="bullet">Terraform</span>
+        <span class="bullet">Linux</span>
       </div>
       <div class="card-footer">Open guide →</div>
     </a>
