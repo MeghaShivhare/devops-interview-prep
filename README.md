@@ -46,6 +46,11 @@ A structured 2-day prep plan with checklists and STAR stories:
 - Linux & Systems (4 questions) — process commands, nice values, hypervisor types
 - Behavioral (3 questions) — coding questions, team collaboration
 
+### [Project Runbooks](project-runbooks/README.md)
+Deep-dive writeups of personal projects — architecture, request flow, design
+decisions, real bugs hit, and interview Q&A:
+- [LLM Cost & Observability Stack](project-runbooks/llm-cost-observability.md) — LiteLLM + Prometheus + Grafana, FinOps-style cost/token/latency tracking for LLM API usage
+
 ## How to use
 
 ```bash
