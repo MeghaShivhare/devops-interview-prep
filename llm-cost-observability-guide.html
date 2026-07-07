@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Cost & Observability — Megha Shivhare</title>
+<style>
+  :root {
+    --ground: #0D1117;
+    --surface: #161B22;
+    --surface-alt: #1C2128;
+    --border: #30363D;
+    --text: #CDD9E5;
+    --text-muted: #7D8590;
+    --text-dim: #484F58;
+    --accent: #58A6FF;
+    --dev: #E6A817;
+    --stage: #2DD4BF;
+    --prod: #F472B6;
+    --mono: ui-monospace, 'Cascadia Code', 'SF Mono', 'Fira Code', Consolas, monospace;
+    --sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --nav-w: 240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .packet { animation: none !important; }
+    .hero-cursor { animation: none !important; }
+  }
+
+  /* ── LAYOUT ─────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: var(--nav-w) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── NAV / PIPELINE ──────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .nav-brand strong {
+    display: block;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 2px;
+    letter-spacing: 0.04em;
+  }
+
+  .pipeline-track {
+    flex: 1;
+    position: relative;
+    padding: 0 1.5rem;
+  }
+
+  .pipeline-line {
+    position: absolute;
+    left: calc(1.5rem + 7px);
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom,
+      var(--accent) 0%,
+      var(--dev) 33%,
+      var(--stage) 66%,
+      var(--prod) 100%
+    );
+    opacity: 0.35;
+  }
+
+  .packet {
+    position: absolute;
+    left: calc(1.5rem + 4px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    animation: flow 4s ease-in-out infinite;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  @keyframes flow {
+    0%   { top: 0%; opacity: 0; }
+    8%   { opacity: 0.6; }
+    90%  { opacity: 0.6; }
+    100% { top: calc(100% - 8px); opacity: 0; }
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    transition: color 0.15s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-item:hover, .nav-item:focus { color: var(--text); outline: none; }
+
+  .nav-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .nav-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    flex-shrink: 0;
+    background: var(--surface);
+    transition: background 0.15s;
+  }
+
+  .nav-item.dev  .nav-dot { border-color: var(--dev);   }
+  .nav-item.stg  .nav-dot { border-color: var(--stage); }
+  .nav-item.prd  .nav-dot { border-color: var(--prod);  }
+  .nav-item.ref  .nav-dot { border-color: var(--accent);}
+
+  .nav-item.dev:hover  .nav-dot { background: var(--dev);   }
+  .nav-item.stg:hover  .nav-dot { background: var(--stage); }
+  .nav-item.prd:hover  .nav-dot { background: var(--prod);  }
+  .nav-item.ref:hover  .nav-dot { background: var(--accent);}
+
+  .nav-label { line-height: 1.2; }
+  .nav-label span { display: block; font-size: 10px; font-family: var(--mono); letter-spacing: 0.06em; opacity: 0.6; }
+
+  .nav-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+  .nav-qa-link { margin-top: auto; padding: 1rem 1.5rem 0; }
+
+  .qa-pill {
+    display: block;
+    background: linear-gradient(135deg, #1a2a1a, #1a1a2a);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 12px;
+    transition: border-color 0.15s;
+  }
+
+  .qa-pill:hover { border-color: var(--accent); }
+
+  .qa-pill strong {
+    display: block;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+
+  /* ── MAIN CONTENT ────────────────────────────── */
+  main { padding: 3rem 4rem; max-width: 920px; }
+
+  /* ── HERO ────────────────────────────────────── */
+  .hero { margin-bottom: 4rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .hero-sub { font-size: 16px; color: var(--text-muted); max-width: 600px; line-height: 1.8; }
+
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.75rem; }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  .tag-dev   { background: rgba(230,168,23,0.12);  color: var(--dev);   border: 1px solid rgba(230,168,23,0.25); }
+  .tag-stage { background: rgba(45,212,191,0.10);  color: var(--stage); border: 1px solid rgba(45,212,191,0.25); }
+  .tag-prod  { background: rgba(244,114,182,0.10); color: var(--prod);  border: 1px solid rgba(244,114,182,0.25); }
+  .tag-ref   { background: rgba(88,166,255,0.10);  color: var(--accent); border: 1px solid rgba(88,166,255,0.25); }
+
+  /* ── SECTION ──────────────────────────────────── */
+  .section { margin-bottom: 4rem; scroll-margin-top: 2rem; }
+
+  .section-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.75rem; }
+
+  .section-num { font-family: var(--mono); font-size: 12px; color: var(--text-dim); flex-shrink: 0; }
+
+  .section h2 { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+
+  .section-body { padding-left: 2.5rem; }
+
+  .section p { color: var(--text); margin-bottom: 1rem; }
+  .section p:last-child { margin-bottom: 0; }
+
+  /* ── CONCEPT BLOCKS ──────────────────────────── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .concept-card { background: var(--surface); padding: 1.25rem; }
+
+  .concept-card h4 { font-family: var(--mono); font-size: 13px; color: var(--accent); margin-bottom: 0.5rem; letter-spacing: 0.02em; }
+
+  .concept-card p { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.6; }
+
+  /* ── COMPARISON TABLE ─────────────────────────── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+
+  .compare-col h4 { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+
+  .compare-col.push h4 { color: var(--dev); }
+  .compare-col.pull h4 { color: var(--prod); }
+
+  .compare-col ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .compare-col li { font-size: 13px; color: var(--text-muted); padding-left: 1.1rem; position: relative; }
+
+  .compare-col.push li::before { content: '·'; position: absolute; left: 0; color: var(--dev); font-size: 15px; top: -2px; }
+  .compare-col.pull li::before { content: '·'; position: absolute; left: 0; color: var(--prod); font-size: 15px; top: -2px; }
+
+  /* ── CODE BLOCK ────────────────────────────────── */
+  .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+
+  .code-block-header {
+    background: var(--surface-alt);
+    padding: 8px 1rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .code-block-header .lang-badge { background: var(--border); padding: 2px 7px; border-radius: 4px; font-size: 10px; letter-spacing: 0.04em; }
+
+  .code-block pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .ky { color: #FF7B72; }
+  .kv { color: #79C0FF; }
+  .km { color: #D2A8FF; }
+  .kc { color: #7D8590; }
+  .ka { color: var(--dev); }
+  .ks { color: var(--stage); }
+  .kp { color: var(--prod); }
+
+  /* ── FLOW DIAGRAM ─────────────────────────────── */
+  .flow { display: flex; align-items: center; gap: 0; margin: 1.5rem 0; flex-wrap: wrap; row-gap: 12px; }
+
+  .flow-node {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .flow-node.dev-node   { border-color: rgba(230,168,23,0.4);  color: var(--dev);   background: rgba(230,168,23,0.05); }
+  .flow-node.stage-node { border-color: rgba(45,212,191,0.4);  color: var(--stage); background: rgba(45,212,191,0.05); }
+  .flow-node.prod-node  { border-color: rgba(244,114,182,0.4); color: var(--prod);  background: rgba(244,114,182,0.05); }
+  .flow-node.ci-node    { border-color: rgba(88,166,255,0.4);  color: var(--accent); background: rgba(88,166,255,0.05); }
+
+  .flow-arrow { font-size: 12px; color: var(--text-dim); padding: 0 6px; flex-shrink: 0; }
+
+  /* ── HIGHLIGHT BOX ────────────────────────────── */
+  .highlight-box { border-left: 3px solid; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; background: var(--surface-alt); }
+
+  .highlight-box.info  { border-color: var(--accent); }
+  .highlight-box.warn  { border-color: var(--dev); }
+  .highlight-box.blinq { border-color: var(--stage); }
+
+  .highlight-box .box-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+
+  .highlight-box.info  .box-label { color: var(--accent); }
+  .highlight-box.warn  .box-label { color: var(--dev); }
+  .highlight-box.blinq .box-label { color: var(--stage); }
+
+  .highlight-box p { font-size: 13.5px; color: var(--text-muted); margin: 0; line-height: 1.7; }
+
+  /* ── PANEL / METRIC ROWS (dashboard panel reference) ── */
+  .panel-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .panel-row { display: grid; grid-template-columns: 190px 1fr; background: var(--surface); }
+
+  .panel-label { padding: 1rem 1.25rem; background: var(--surface-alt); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; }
+
+  .panel-label strong { font-family: var(--mono); font-size: 13px; color: var(--text); display: block; margin-bottom: 2px; }
+
+  .panel-label span { font-size: 11px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.02em; }
+
+  .panel-body { padding: 1rem 1.25rem; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+  .panel-body code {
+    display: block;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--stage);
+    background: #010409;
+    padding: 0.6rem 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* ── NUMBERS CALLOUT ──────────────────────────── */
+  .numbers-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .num-cell { background: var(--surface); padding: 1.25rem; text-align: center; }
+
+  .num-big { font-family: var(--mono); font-size: 2rem; font-weight: 600; display: block; line-height: 1; margin-bottom: 6px; }
+
+  .num-cell:nth-child(1) .num-big { color: var(--accent); }
+  .num-cell:nth-child(2) .num-big { color: var(--stage); }
+  .num-cell:nth-child(3) .num-big { color: var(--dev); }
+
+  .num-label { font-size: 12px; color: var(--text-muted); }
+
+  /* ── Q&A ─────────────────────────────────────── */
+  .qa-section { margin-bottom: 4rem; scroll-margin-top: 2rem; }
+
+  .qa-section h2 { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+
+  .qa-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; display: block; }
+
+  .qa-intro { font-size: 14px; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.7; }
+
+  .qa-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+
+  .qa-question {
+    width: 100%;
+    background: var(--surface);
+    border: none;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    color: var(--text);
+    font-size: 14px;
+    font-family: var(--sans);
+    font-weight: 500;
+    line-height: 1.5;
+    transition: background 0.15s;
+  }
+
+  .qa-question:hover { background: var(--surface-alt); }
+
+  .qa-question:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .qa-q-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; flex-shrink: 0; padding: 2px 8px; border-radius: 20px; }
+
+  .qa-item.concept .qa-q-tag  { background: rgba(88,166,255,0.12);  color: var(--accent); border: 1px solid rgba(88,166,255,0.2); }
+  .qa-item.scenario .qa-q-tag { background: rgba(45,212,191,0.10);  color: var(--stage);  border: 1px solid rgba(45,212,191,0.2); }
+  .qa-item.tradeoff .qa-q-tag { background: rgba(230,168,23,0.12);  color: var(--dev);    border: 1px solid rgba(230,168,23,0.2); }
+
+  .qa-chevron { font-size: 12px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+
+  .qa-answer { display: none; padding: 0 1.25rem 1.25rem; background: var(--surface); border-top: 1px solid var(--border); }
+
+  .qa-item.open .qa-answer { display: block; }
+  .qa-item.open .qa-chevron { transform: rotate(180deg); }
+
+  .qa-answer p { font-size: 14px; color: var(--text-muted); line-height: 1.75; margin-top: 1rem; margin-bottom: 0.75rem; }
+  .qa-answer p:last-child { margin-bottom: 0; }
+  .qa-answer strong { color: var(--text); }
+
+  .qa-answer .answer-note {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(88,166,255,0.07);
+    border-left: 2px solid var(--accent);
+    padding: 0.6rem 0.85rem;
+    border-radius: 0 4px 4px 0;
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .qa-answer ul { list-style: none; display: flex; flex-direction: column; gap: 5px; margin: 0.75rem 0; }
+
+  .qa-answer ul li { font-size: 14px; color: var(--text-muted); padding-left: 1.25rem; position: relative; line-height: 1.65; }
+
+  .qa-answer ul li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 12px; top: 1px; }
+
+  /* ── STEP LIST ────────────────────────────────── */
+  .step-list { display: flex; flex-direction: column; gap: 4px; margin: 1.5rem 0; }
+
+  .step { display: flex; align-items: baseline; gap: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.85rem 1.1rem; }
+
+  .step-n { font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; width: 24px; }
+
+  .step-content strong { font-size: 14px; color: var(--text); display: block; margin-bottom: 2px; }
+
+  .step-content span { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── SEPARATOR ────────────────────────────────── */
+  hr.sep { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+
+  code { font-family: var(--mono); font-size: 0.9em; background: rgba(110,118,129,0.15); padding: 1px 5px; border-radius: 4px; }
+
+  /* ── RESPONSIVE ───────────────────────────────── */
+  @media (max-width: 800px) {
+    .shell { grid-template-columns: 1fr; }
+    nav { display: none; }
+    main { padding: 2rem 1.5rem; }
+    .numbers-row { grid-template-columns: 1fr; }
+    .compare { grid-template-columns: 1fr; }
+    .panel-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── SIDEBAR NAV ────────────────────────────── -->
+  <nav aria-label="Page navigation">
+    <div class="nav-brand">
+      <strong>LLM Cost & Observability</strong>
+      Personal Project Deep Dive
+    </div>
+    <div class="pipeline-track">
+      <div class="pipeline-line" aria-hidden="true"></div>
+      <div class="packet" aria-hidden="true"></div>
+
+      <a href="#overview" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Overview<span>Why this exists</span></span>
+      </a>
+      <a href="#architecture" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Architecture<span>Request-flow diagram</span></span>
+      </a>
+      <a href="#cost-mechanic" class="nav-item dev">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Cost Mechanic<span>Two-tier pricing</span></span>
+      </a>
+      <a href="#dashboard" class="nav-item stg">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Dashboard<span>8 panels &amp; PromQL</span></span>
+      </a>
+      <a href="#debugging" class="nav-item dev">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">War Stories<span>6 real bugs fixed</span></span>
+      </a>
+      <a href="#roadmap" class="nav-item prd">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Prod Roadmap<span>What I'd add next</span></span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a href="#qa" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Mock Q&amp;A<span>Practice questions</span></span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── MAIN CONTENT ───────────────────────────── -->
+  <main>
+
+    <!-- HERO -->
+    <header class="hero">
+      <p class="hero-eyebrow">Personal Project · LiteLLM · Prometheus · Grafana</p>
+      <h1>FinOps for<br>LLM spend<span class="hero-cursor" aria-hidden="true"></span></h1>
+      <p class="hero-sub">
+        Nobody notices LLM API spend until the bill arrives — the same blind spot AWS had before tagging discipline existed. I built a small stack that tracks cost, tokens, latency, and error rate per model tier in real time, reusing the exact Prometheus/Grafana playbook I already use for cloud cost monitoring, pointed at LLM spend instead.
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-ref">LiteLLM</span>
+        <span class="tag tag-dev">Prometheus</span>
+        <span class="tag tag-stage">Grafana</span>
+        <span class="tag tag-prod">Docker · FastAPI</span>
+        <span class="tag tag-ref">PromQL</span>
+      </div>
+    </header>
+
+    <!-- ── SECTION 1: OVERVIEW ─────────────────── -->
+    <section class="section" id="overview">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Overview — why this exists</h2>
+      </div>
+      <div class="section-body">
+        <p>Most public LLMOps/cost content comes from ML engineers. This project takes the infra/DevOps angle instead: LLM API spend is untracked in most orgs the same way AWS spend was before tagging discipline — nobody notices which team or model is burning budget until the bill arrives. This reuses a skill set I already have (Prometheus/Grafana, cost-attribution thinking from the AWS cost reduction work) and points it at a new target — LLM spend — rather than learning an unrelated stack from scratch.</p>
+
+        <div class="numbers-row">
+          <div class="num-cell">
+            <span class="num-big">2</span>
+            <span class="num-label">model tiers priced differently against one mock backend</span>
+          </div>
+          <div class="num-cell">
+            <span class="num-big">8</span>
+            <span class="num-label">Grafana panels, each verified against live Prometheus data</span>
+          </div>
+          <div class="num-cell">
+            <span class="num-big">6</span>
+            <span class="num-label">real bugs hit and fixed while building it — see War Stories</span>
+          </div>
+        </div>
+
+        <p><strong>One-liner:</strong> a FinOps dashboard for LLM API usage — the same cost-attribution-by-tag pattern used for cloud spend, applied to "which model tier is burning money" instead of "which service/team is burning money."</p>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 2: ARCHITECTURE ─────────────── -->
+    <section class="section" id="architecture">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Architecture</h2>
+      </div>
+      <div class="section-body">
+        <p>One request's full journey through the stack:</p>
+
+        <div class="flow">
+          <div class="flow-node">Client / traffic script</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node ci-node">LiteLLM proxy :4000</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node dev-node">mock-llm :8080</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node ci-node">LiteLLM computes cost</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node stage-node">Prometheus :9090</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node prod-node">Grafana :3000</div>
+        </div>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>mock-llm</h4>
+            <p>Minimal FastAPI app mimicking OpenAI's chat completions endpoint. Sleeps 0.2–1.2s per request, fakes token usage, randomly returns 500s (~5%). Exists so the stack runs free and offline — swappable for a real provider with a one-line config change.</p>
+          </div>
+          <div class="concept-card">
+            <h4>LiteLLM proxy</h4>
+            <p>Routes requests to whichever backend a model alias maps to, retries transparently on failure, computes per-request cost from configured pricing, and exports everything as Prometheus metrics.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Prometheus</h4>
+            <p>Scrapes LiteLLM's <code>/metrics/</code> endpoint every 5 seconds and stores the resulting time series, keyed by labels like <code>requested_model</code> and <code>status_code</code>.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Grafana</h4>
+            <p>Fully file-provisioned — one datasource, one 8-panel dashboard, zero manual clicking. Queries Prometheus directly via PromQL on a 10s refresh.</p>
+          </div>
+        </div>
+
+        <div class="highlight-box info">
+          <p class="box-label">Why a mock backend, not a real provider</p>
+          <p>Zero API keys, zero real spend, fully offline. Nothing downstream of LiteLLM cares what's actually behind it — swapping <code>mock-llm</code> for real OpenAI/Anthropic/Bedrock is a one-line change to <code>api_base</code> in LiteLLM's config. Nothing else in the pipeline changes.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 3: COST MECHANIC ─────────────── -->
+    <section class="section" id="cost-mechanic">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>The cost mechanic</h2>
+      </div>
+      <div class="section-body">
+        <p><code>mini-model</code> and <code>flagship-model</code> both route to the exact same mock backend — but each carries different configured per-token pricing in LiteLLM's config, modeled after real GPT-4o-mini vs GPT-4o rates:</p>
+
+        <div class="compare">
+          <div class="compare-col push">
+            <h4>mini-model</h4>
+            <ul>
+              <li>$0.00000015 / input token</li>
+              <li>$0.0000006 / output token</li>
+              <li>Modeled after GPT-4o-mini pricing</li>
+            </ul>
+          </div>
+          <div class="compare-col pull">
+            <h4>flagship-model</h4>
+            <ul>
+              <li>$0.0000025 / input token</li>
+              <li>$0.00001 / output token</li>
+              <li>Modeled after GPT-4o pricing</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-block-header">
+            <span class="lang-badge">yaml</span>
+            litellm/config.yaml
+          </div>
+          <pre><span class="ky">model_list</span><span class="kv">:</span>
+  <span class="kc">- model_name: mini-model</span>
+    <span class="ky">litellm_params</span><span class="kv">:</span>
+      <span class="ky">model</span><span class="kv">: openai/demo-model</span>
+      <span class="ky">api_base</span><span class="kv">: http://mock-llm:8080/v1</span>
+    <span class="ky">model_info</span><span class="kv">:</span>
+      <span class="ky">input_cost_per_token</span><span class="kv">: 0.00000015</span>
+      <span class="ky">output_cost_per_token</span><span class="kv">: 0.0000006</span>
+
+  <span class="kc">- model_name: flagship-model</span>
+    <span class="ky">litellm_params</span><span class="kv">:</span>
+      <span class="ky">model</span><span class="kv">: openai/demo-model</span>   <span class="kc"># same backend</span>
+      <span class="ky">api_base</span><span class="kv">: http://mock-llm:8080/v1</span>
+    <span class="ky">model_info</span><span class="kv">:</span>
+      <span class="ky">input_cost_per_token</span><span class="kv">: 0.0000025</span>
+      <span class="ky">output_cost_per_token</span><span class="kv">: 0.00001</span></pre>
+        </div>
+
+        <div class="highlight-box warn">
+          <p class="box-label">The key mechanic</p>
+          <p>LiteLLM prices a response using the pricing attached to the <strong>requested model alias</strong> — not whatever backend actually served it. That's what makes a two-tier cost breakdown possible against a single physical backend. In production, the same mechanic runs in the other direction: an alias like <code>internal-summarizer</code> can point at whatever real backend you want without callers ever knowing.</p>
+        </div>
+
+        <p>LiteLLM also retries automatically on backend failure. When <code>mock-llm</code>'s simulated 500s hit, the client still saw 200s — visible in the metrics as <code>litellm_deployment_total_requests_total</code> (includes retries) running higher than <code>litellm_deployment_success_responses_total</code> (final successes only).</p>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 4: DASHBOARD ─────────────────── -->
+    <section class="section" id="dashboard">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Dashboard — 8 panels &amp; their queries</h2>
+      </div>
+      <div class="section-body">
+        <p>Every query below was verified directly against Prometheus's <code>/api/v1/query</code> API with real traffic flowing through the stack before being trusted in a dashboard panel — a panel that parses fine but silently shows nothing is worse than an obvious error.</p>
+
+        <div class="panel-rows">
+          <div class="panel-row">
+            <div class="panel-label"><strong>Total Spend</strong><span>stat</span></div>
+            <div class="panel-body"><code>sum(litellm_spend_metric_total)</code>Cumulative dollars across all requests since stack start.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Total Requests</strong><span>stat</span></div>
+            <div class="panel-body"><code>sum(litellm_requests_metric_total)</code>Cumulative request count.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Total Tokens</strong><span>stat</span></div>
+            <div class="panel-body"><code>sum(litellm_total_tokens_metric_total)</code>Cumulative input + output tokens.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>p95 API Latency</strong><span>stat</span></div>
+            <div class="panel-body"><code>histogram_quantile(0.95, sum by (le) (rate(litellm_llm_api_latency_metric_bucket[5m])))</code>95th percentile response time over the last 5 minutes.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Spend by Model Tier</strong><span>time series</span></div>
+            <div class="panel-body"><code>sum by (requested_model) (increase(litellm_spend_metric_total[5m]))</code>Cost broken down per tier — the core FinOps panel.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Tokens by Model Tier</strong><span>time series</span></div>
+            <div class="panel-body"><code>sum by (requested_model) (increase(litellm_input_tokens_metric_total[5m]))</code>Token volume per tier, input vs output split.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Request Rate by Status</strong><span>time series</span></div>
+            <div class="panel-body"><code>sum by (status_code) (rate(litellm_proxy_total_requests_metric_total[5m]))</code>Client-facing success/error rate.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Deployment Failures</strong><span>time series</span></div>
+            <div class="panel-body"><code>sum by (requested_model) (litellm_deployment_total_requests_total) - sum by (requested_model) (litellm_deployment_success_responses_total)</code>Upstream errors LiteLLM silently retried — invisible from the status-code panel alone.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 5: WAR STORIES ───────────────── -->
+    <section class="section" id="debugging">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Debugging war stories</h2>
+      </div>
+      <div class="section-body">
+        <p>Real issues hit while building this, in order — good STAR-story material since they're genuine bugs, not hypotheticals.</p>
+
+        <div class="step-list">
+          <div class="step">
+            <span class="step-n">1</span>
+            <div class="step-content">
+              <strong>LiteLLM silent for ~60–90s on every start</strong>
+              <span>No log output during startup made it look hung. Confirmed via <code>docker stats</code> that CPU stayed non-zero — it was loading its internal pricing map, not crash-looping.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">2</span>
+            <div class="step-content">
+              <strong>Prometheus target down, HTTP 401</strong>
+              <span>LiteLLM's <code>/metrics</code> requires bearer auth by default; Prometheus's static scrape config sends none. Fixed with <code>require_auth_for_metrics_endpoint: false</code> (acceptable since the endpoint isn't exposed outside the Docker network).</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">3</span>
+            <div class="step-content">
+              <strong>Scrape still failing after the auth fix</strong>
+              <span><code>/metrics</code> 307-redirects to <code>/metrics/</code>, and Prometheus doesn't follow redirects on scrape. Pointed <code>metrics_path</code> at the resolved path directly.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">4</span>
+            <div class="step-content">
+              <strong>PromQL dropped a label mid-query</strong>
+              <span>Subtracting two metrics with <code>- on (model_id) ...</code> matched correctly but discarded <code>requested_model</code> from the result, collapsing per-tier data into one number. Fixed by aggregating each side down to <code>requested_model</code> before subtracting.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">5</span>
+            <div class="step-content">
+              <strong>Grafana: "data source not found" after a config change</strong>
+              <span><code>docker-compose restart</code> reuses the same container filesystem (incl. Grafana's sqlite state), so a datasource UID change collided with the old provisioned record. Fixed with <code>up -d --force-recreate</code> — a clean container instead of a restarted one.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">6</span>
+            <div class="step-content">
+              <strong>p95 latency read ~9s against a 0.2–1.2s backend</strong>
+              <span>Single Uvicorn worker meant concurrent requests queued behind each other — queueing delay counted as latency, not service time. Fixed with 4 workers. Same class of issue as an under-provisioned connection pool inflating p95/p99 without the service actually being slower.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ── SECTION 6: PRODUCTION ROADMAP ────────── -->
+    <section class="section" id="roadmap">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>How I'd productionize this</h2>
+      </div>
+      <div class="section-body">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Real backend</h4>
+            <p>Swap <code>mock-llm</code> for OpenAI/Anthropic/Bedrock — one line (<code>api_base</code>) in config, nothing else changes.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Long-term storage</h4>
+            <p>Prometheus alone isn't durable/long-retention — add remote-write to Thanos or Mimir.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Alerting</h4>
+            <p>LiteLLM already exposes <code>litellm_remaining_api_key_budget_metric</code> — wire an Alertmanager rule on spend-rate-exceeds-budget, plus error-rate and latency-SLO alerts.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Chargeback</h4>
+            <p>Metrics already carry <code>team</code>, <code>user</code>, and <code>api_key_alias</code> labels — map those directly onto per-team/per-project cost breakdowns.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Metrics auth</h4>
+            <p>Replace the disabled-auth shortcut with a scoped scrape-config credential or network-level isolation (private subnet / security group).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MOCK Q&A ──────────────────────────────── -->
+    <section class="qa-section" id="qa">
+      <span class="qa-eyebrow">Practice</span>
+      <h2>Mock Interview Q&amp;A</h2>
+      <p class="qa-intro">Click to reveal a strong answer — read it once, then close it and try to say it in your own words.</p>
+
+      <div class="qa-item concept" role="region">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Walk me through this project — what problem does it solve?</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Cost and usage visibility for LLM API calls — the same blind spot cloud spend had before tagging discipline existed. Nobody notices which team or model tier is burning budget until the bill arrives; this makes that visible and queryable in real time, using LiteLLM as a proxy in front of any provider, Prometheus to store the metrics, and Grafana to visualize spend/tokens/latency/errors broken down by model tier.</p>
+        </div>
+      </div>
+
+      <div class="qa-item concept">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Why LiteLLM instead of writing your own proxy?</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>It already solves provider-agnostic routing, automatic retries, and per-token cost calculation, and ships Prometheus metrics out of the box. Reflects a real build-vs-buy call — the interesting engineering here is the metrics and dashboard layer, not reinventing an LLM gateway.</p>
+        </div>
+      </div>
+
+      <div class="qa-item scenario">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>How does cost differ between two tiers if they hit the exact same backend?</span>
+          <span class="qa-q-tag">scenario</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>LiteLLM prices a response using the <code>model_info</code> pricing tied to the <em>requested</em> model alias, not whatever backend actually served it. Pricing is configuration, fully decoupled from the physical backend — so two aliases pointed at one mock server can still show a completely different cost breakdown in the dashboard.</p>
+          <div class="answer-note">Follow-up they might ask: "Is that realistic?" → Yes — it's the same mechanic you'd use in reverse in production: point an internal alias at whichever real backend you want, and callers never need to know.</div>
+        </div>
+      </div>
+
+      <div class="qa-item scenario">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What was the hardest part of building this?</span>
+          <span class="qa-q-tag">scenario</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Metric name and label discovery. LiteLLM's Prometheus metric names aren't fully documented in one place, so I verified every single PromQL query against the live <code>/metrics</code> endpoint and Prometheus's query API with real traffic before trusting it in a dashboard panel — otherwise you get a panel that parses fine but silently shows nothing, which is worse than an obvious error because it looks done when it isn't.</p>
+        </div>
+      </div>
+
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>You disabled auth on the metrics endpoint — isn't that a security problem?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>In this local stack, yes it's a shortcut — but a scoped one: the endpoint is only reachable inside the Docker network, never exposed to a host port or the internet. In production I wouldn't take that shortcut; I'd either give Prometheus's scrape config a scoped bearer credential or rely on network-level isolation (private subnet, security group) so the metrics endpoint is unreachable regardless of its own auth setting.</p>
+          <div class="answer-note">This is a good one to bring up proactively — naming the trade-off yourself signals you understand it wasn't an oversight.</div>
+        </div>
+      </div>
+
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>How would you productionize this?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Five things, in rough priority order: swap the mock backend for a real provider (one config line), add remote-write to a long-term store like Thanos or Mimir since Prometheus alone isn't durable, wire budget/error-rate/latency alerts through Alertmanager, use the <code>team</code>/<code>user</code>/<code>api_key_alias</code> labels LiteLLM already emits for chargeback, and replace the local auth shortcut on the metrics endpoint with proper scoped credentials or network isolation.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function toggle(btn) {
+    const item = btn.closest('.qa-item');
+    const answer = item.querySelector('.qa-answer');
+    const isOpen = item.classList.contains('open');
+    item.classList.toggle('open', !isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
+    answer.hidden = isOpen;
+  }
+</script>
+
+</body>
+</html>

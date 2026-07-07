@@ -1,6 +1,6 @@
 # DevOps Interview Prep
 
-Interactive HTML interview guides covering the tools and practices I've worked with as a DevOps engineer — Karpenter, GitOps with ArgoCD + Kargo, and a full 2-day interview war room.
+Interactive HTML interview guides covering the tools and practices I've worked with as a DevOps engineer — Karpenter, GitOps with ArgoCD + Kargo, a full 2-day interview war room, and deep dives into personal projects.
 
 These guides are self-contained HTML files. Open them directly in a browser — no server needed.
 
@@ -46,10 +46,13 @@ A structured 2-day prep plan with checklists and STAR stories:
 - Linux & Systems (4 questions) — process commands, nice values, hypervisor types
 - Behavioral (3 questions) — coding questions, team collaboration
 
-### [Project Runbooks](project-runbooks/README.md)
-Deep-dive writeups of personal projects — architecture, request flow, design
-decisions, real bugs hit, and interview Q&A:
-- [LLM Cost & Observability Stack](project-runbooks/llm-cost-observability.md) — LiteLLM + Prometheus + Grafana, FinOps-style cost/token/latency tracking for LLM API usage
+### [LLM Cost & Observability Guide](llm-cost-observability-guide.html)
+Deep dive into a personal project — a FinOps dashboard for LLM API usage:
+- Full architecture and request-flow diagram (LiteLLM → mock backend → Prometheus → Grafana)
+- The two-tier pricing mechanic that makes per-model cost attribution possible
+- All 8 dashboard panels with their exact PromQL queries
+- 6 real bugs hit and fixed while building it (auth, redirects, PromQL label bugs, container state)
+- Production roadmap and mock Q&A
 
 ## How to use
 
@@ -58,6 +61,7 @@ decisions, real bugs hit, and interview Q&A:
 open karpenter-study-guide.html
 open gitops-interview-guide.html
 open interview-war-room.html
+open llm-cost-observability-guide.html
 ```
 
 Or clone and open from GitHub Pages once the repo is published.
