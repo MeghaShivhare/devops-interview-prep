@@ -781,6 +781,12 @@
             <div class="panel-body"><code>sum by (requested_model) (litellm_deployment_total_requests_total) - sum by (requested_model) (litellm_deployment_success_responses_total)</code>Upstream errors LiteLLM silently retried — invisible from the status-code panel alone.</div>
           </div>
         </div>
+
+        <div class="highlight-box info">
+          <p class="box-label">What "p95" actually means</p>
+          <p>Sort every request's response time slowest to fastest. p95 is the value where 95% of requests were faster than it — only the slowest 5% took longer. It's deliberately not an average: a couple of extreme outliers barely move an average, but they're exactly what makes a real user notice things feel slow. p95 (and its stricter cousin p99) answers "how bad does it get for the unlucky-but-not-rare tail," which is what most latency SLOs are actually written against.</p>
+          <p>In this stack, the mock backend only sleeps 0.2–1.2s per request, but p95 often reads several seconds higher — because concurrent requests from a traffic burst queue up behind each other (queueing delay counts as latency too), and LiteLLM's automatic retries on the ~5% simulated failures add real wall-clock time. Both are honest contributors, not a measurement bug — see War Story #6.</p>
+        </div>
       </div>
     </section>
 
@@ -900,7 +906,9 @@
           <span class="qa-chevron" aria-hidden="true">▾</span>
         </button>
         <div class="qa-answer" hidden>
-          <p>It already solves provider-agnostic routing, automatic retries, and per-token cost calculation, and ships Prometheus metrics out of the box. Reflects a real build-vs-buy call — the interesting engineering here is the metrics and dashboard layer, not reinventing an LLM gateway.</p>
+          <p>Without it, there are two worse options. <strong>Roll your own:</strong> every provider (OpenAI, Anthropic, Bedrock) has its own request format, auth style, and pricing table — you'd hand-write "if it's OpenAI, price it this way; if it's Anthropic, price it that way" and maintain it forever as prices change. <strong>Pay for a hosted LLM-observability SaaS</strong> (Helicone, Langfuse, etc.) — works, but routes your data through a third party and costs money.</p>
+          <p>What LiteLLM actually buys you: one request/response shape regardless of what's behind it (which is also why a mock backend could stand in for a real provider so easily — it just had to speak that one shape); pricing math it already knows how to do from a one-time price list instead of code you'd write yourself; Prometheus metrics with one config line instead of building a metrics system from scratch; and automatic retries on transient failures for free. It's also self-hosted and free — nothing leaves your own infra.</p>
+          <div class="answer-note">One-liner: LiteLLM turns "build a billing and metrics system for AI calls" into "write a two-line price list" — that's the entire reason it's in this project instead of a hand-rolled proxy.</div>
         </div>
       </div>
 
