@@ -100,11 +100,13 @@
     .card.gitops::before     { background: var(--teal); }
     .card.warroom::before    { background: var(--orange); }
     .card.questions::before  { background: var(--pink); }
+    .card.gpu::before        { background: var(--accent); }
 
     .card:hover.karpenter  { border-color: rgba(88,166,255,0.5); }
     .card:hover.gitops     { border-color: rgba(45,212,191,0.5); }
     .card:hover.warroom    { border-color: rgba(240,165,0,0.5); }
     .card:hover.questions  { border-color: rgba(244,114,182,0.5); }
+    .card:hover.gpu        { border-color: rgba(88,166,255,0.5); }
 
     .card-header {
       display: flex;
@@ -131,6 +133,7 @@
     .gitops    .card-badge  { color: var(--teal);   border-color: rgba(45,212,191,0.3); background: rgba(45,212,191,0.08); }
     .warroom   .card-badge  { color: var(--orange); border-color: rgba(240,165,0,0.3);  background: rgba(240,165,0,0.08); }
     .questions .card-badge  { color: var(--pink);   border-color: rgba(244,114,182,0.3);background: rgba(244,114,182,0.08); }
+    .gpu       .card-badge  { color: var(--accent); border-color: rgba(88,166,255,0.3); background: rgba(88,166,255,0.08); }
 
     .card-desc {
       font-size: 13.5px;
@@ -271,6 +274,25 @@
       <div class="card-footer">Open guide →</div>
     </a>
 
+
+    <a class="card gpu" href="gpu-inference-finops-guide.html">
+      <div class="card-header">
+        <div class="card-title">GPU Inference FinOps</div>
+        <span class="card-badge">DEEP DIVE</span>
+      </div>
+      <p class="card-desc">
+        Cost and utilization optimization for GPU-based LLM inference on GKE — sharing one physical GPU across model replicas via NVIDIA time-slicing, plus the real 3-quota gauntlet hit standing up a single Spot GPU on a new GCP account.
+      </p>
+      <div class="card-bullets">
+        <span class="bullet">GKE + Terraform</span>
+        <span class="bullet">vLLM serving</span>
+        <span class="bullet">Time-slicing vs MIG</span>
+        <span class="bullet">GCP quota gauntlet</span>
+        <span class="bullet">DCGM + Prometheus + Grafana</span>
+        <span class="bullet">Mock Q&amp;A</span>
+      </div>
+      <div class="card-footer">Open guide →</div>
+    </a>
 
     <a class="card questions" href="interview-questions.html">
       <div class="card-header">

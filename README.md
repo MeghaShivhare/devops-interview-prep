@@ -54,6 +54,15 @@ Deep dive into a personal project — a FinOps dashboard for LLM API usage:
 - 6 real bugs hit and fixed while building it (auth, redirects, PromQL label bugs, container state)
 - Production roadmap and mock Q&A
 
+### [GPU Inference FinOps Guide](gpu-inference-finops-guide.html)
+Deep dive into a personal project — GPU cost/utilization optimization on GKE:
+- Full architecture: Terraform → GKE (system-pool + GPU-pool) → vLLM → DCGM/Prometheus/Grafana
+- Time-slicing vs. MIG, and the compute-vs-memory nuance most people miss
+- The real 3-quota gauntlet hit provisioning a single Spot GPU on a new GCP account
+- Planned DCGM + vLLM dashboard panels and PromQL queries
+- 6+ real infra gotchas hit and fixed (ADC vs. gcloud auth, forces-replacement, gated model swap, and more)
+- Mock Q&A with model answers
+
 ## How to use
 
 ```bash
@@ -62,6 +71,7 @@ open karpenter-study-guide.html
 open gitops-interview-guide.html
 open interview-war-room.html
 open llm-cost-observability-guide.html
+open gpu-inference-finops-guide.html
 ```
 
 Or clone and open from GitHub Pages once the repo is published.

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPU Inference FinOps — Megha Shivhare</title>
+<style>
+  :root {
+    --ground: #0D1117;
+    --surface: #161B22;
+    --surface-alt: #1C2128;
+    --border: #30363D;
+    --text: #CDD9E5;
+    --text-muted: #7D8590;
+    --text-dim: #484F58;
+    --accent: #58A6FF;
+    --dev: #E6A817;
+    --stage: #2DD4BF;
+    --prod: #F472B6;
+    --mono: ui-monospace, 'Cascadia Code', 'SF Mono', 'Fira Code', Consolas, monospace;
+    --sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --nav-w: 240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .packet { animation: none !important; }
+    .hero-cursor { animation: none !important; }
+  }
+
+  .shell { display: grid; grid-template-columns: var(--nav-w) 1fr; min-height: 100vh; }
+
+  nav {
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 2rem 0; display: flex; flex-direction: column;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+
+  .nav-brand {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-muted); padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;
+  }
+  .nav-brand strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 2px; letter-spacing: 0.04em; }
+
+  .pipeline-track { flex: 1; position: relative; padding: 0 1.5rem; }
+
+  .pipeline-line {
+    position: absolute; left: calc(1.5rem + 7px); top: 8px; bottom: 8px; width: 2px;
+    background: linear-gradient(to bottom, var(--accent) 0%, var(--dev) 33%, var(--stage) 66%, var(--prod) 100%);
+    opacity: 0.35;
+  }
+
+  .packet {
+    position: absolute; left: calc(1.5rem + 4px); width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); opacity: 0; animation: flow 4s ease-in-out infinite; box-shadow: 0 0 6px var(--accent);
+  }
+
+  @keyframes flow { 0% { top: 0%; opacity: 0; } 8% { opacity: 0.6; } 90% { opacity: 0.6; } 100% { top: calc(100% - 8px); opacity: 0; } }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 6px 0; text-decoration: none;
+    color: var(--text-muted); font-size: 13px; transition: color 0.15s; position: relative; z-index: 1;
+  }
+  .nav-item:hover, .nav-item:focus { color: var(--text); outline: none; }
+  .nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+  .nav-dot {
+    width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor;
+    flex-shrink: 0; background: var(--surface); transition: background 0.15s;
+  }
+  .nav-item.dev  .nav-dot { border-color: var(--dev);   }
+  .nav-item.stg  .nav-dot { border-color: var(--stage); }
+  .nav-item.prd  .nav-dot { border-color: var(--prod);  }
+  .nav-item.ref  .nav-dot { border-color: var(--accent);}
+  .nav-item.dev:hover  .nav-dot { background: var(--dev);   }
+  .nav-item.stg:hover  .nav-dot { background: var(--stage); }
+  .nav-item.prd:hover  .nav-dot { background: var(--prod);  }
+  .nav-item.ref:hover  .nav-dot { background: var(--accent);}
+
+  .nav-label { line-height: 1.2; }
+  .nav-label span { display: block; font-size: 10px; font-family: var(--mono); letter-spacing: 0.06em; opacity: 0.6; }
+
+  .nav-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+  .nav-qa-link { margin-top: auto; padding: 1rem 1.5rem 0; }
+
+  .qa-pill {
+    display: block; background: linear-gradient(135deg, #1a2a1a, #1a1a2a); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.75rem 1rem; text-decoration: none; color: var(--text); font-size: 12px; transition: border-color 0.15s;
+  }
+  .qa-pill:hover { border-color: var(--accent); }
+  .qa-pill strong { display: block; font-family: var(--mono); font-size: 13px; color: var(--accent); margin-bottom: 2px; }
+
+  main { padding: 3rem 4rem; max-width: 920px; }
+
+  .hero { margin-bottom: 4rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: var(--mono); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 600; line-height: 1.1;
+    color: var(--text); margin-bottom: 1.25rem; letter-spacing: -0.02em;
+  }
+  .hero-cursor {
+    display: inline-block; width: 0.55em; height: 1em; background: var(--accent);
+    vertical-align: text-bottom; margin-left: 2px; animation: blink 1.1s step-end infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .hero-sub { font-size: 16px; color: var(--text-muted); max-width: 640px; line-height: 1.8; }
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.75rem; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.04em; }
+  .tag-dev   { background: rgba(230,168,23,0.12);  color: var(--dev);   border: 1px solid rgba(230,168,23,0.25); }
+  .tag-stage { background: rgba(45,212,191,0.10);  color: var(--stage); border: 1px solid rgba(45,212,191,0.25); }
+  .tag-prod  { background: rgba(244,114,182,0.10); color: var(--prod);  border: 1px solid rgba(244,114,182,0.25); }
+  .tag-ref   { background: rgba(88,166,255,0.10);  color: var(--accent); border: 1px solid rgba(88,166,255,0.25); }
+
+  .section { margin-bottom: 4rem; scroll-margin-top: 2rem; }
+  .section-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.75rem; }
+  .section-num { font-family: var(--mono); font-size: 12px; color: var(--text-dim); flex-shrink: 0; }
+  .section h2 { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .section-body { padding-left: 2.5rem; }
+  .section p { color: var(--text); margin-bottom: 1rem; }
+  .section p:last-child { margin-bottom: 0; }
+
+  .concept-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px;
+    background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0;
+  }
+  .concept-card { background: var(--surface); padding: 1.25rem; }
+  .concept-card h4 { font-family: var(--mono); font-size: 13px; color: var(--accent); margin-bottom: 0.5rem; letter-spacing: 0.02em; }
+  .concept-card p { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.6; }
+
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0;
+  }
+  .compare-col { background: var(--surface); padding: 1.25rem; }
+  .compare-col h4 { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+  .compare-col.push h4 { color: var(--dev); }
+  .compare-col.pull h4 { color: var(--prod); }
+  .compare-col ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .compare-col li { font-size: 13px; color: var(--text-muted); padding-left: 1.1rem; position: relative; }
+  .compare-col.push li::before { content: '·'; position: absolute; left: 0; color: var(--dev); font-size: 15px; top: -2px; }
+  .compare-col.pull li::before { content: '·'; position: absolute; left: 0; color: var(--prod); font-size: 15px; top: -2px; }
+
+  .code-block { background: #010409; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
+  .code-block-header {
+    background: var(--surface-alt); padding: 8px 1rem; font-family: var(--mono); font-size: 11px; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+  }
+  .code-block-header .lang-badge { background: var(--border); padding: 2px 7px; border-radius: 4px; font-size: 10px; letter-spacing: 0.04em; }
+  .code-block pre {
+    padding: 1.25rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.7;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+  .ky { color: #FF7B72; } .kv { color: #79C0FF; } .km { color: #D2A8FF; }
+  .kc { color: #7D8590; } .ka { color: var(--dev); } .ks { color: var(--stage); } .kp { color: var(--prod); }
+
+  .flow { display: flex; align-items: center; gap: 0; margin: 1.5rem 0; flex-wrap: wrap; row-gap: 12px; }
+  .flow-node {
+    background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 1rem;
+    font-family: var(--mono); font-size: 12px; color: var(--text); white-space: nowrap;
+  }
+  .flow-node.dev-node   { border-color: rgba(230,168,23,0.4);  color: var(--dev);   background: rgba(230,168,23,0.05); }
+  .flow-node.stage-node { border-color: rgba(45,212,191,0.4);  color: var(--stage); background: rgba(45,212,191,0.05); }
+  .flow-node.prod-node  { border-color: rgba(244,114,182,0.4); color: var(--prod);  background: rgba(244,114,182,0.05); }
+  .flow-node.ci-node    { border-color: rgba(88,166,255,0.4);  color: var(--accent); background: rgba(88,166,255,0.05); }
+  .flow-arrow { font-size: 12px; color: var(--text-dim); padding: 0 6px; flex-shrink: 0; }
+
+  .highlight-box { border-left: 3px solid; padding: 1rem 1.25rem; border-radius: 0 6px 6px 0; margin: 1.5rem 0; background: var(--surface-alt); }
+  .highlight-box.info  { border-color: var(--accent); }
+  .highlight-box.warn  { border-color: var(--dev); }
+  .highlight-box.blinq { border-color: var(--stage); }
+  .highlight-box .box-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .highlight-box.info  .box-label { color: var(--accent); }
+  .highlight-box.warn  .box-label { color: var(--dev); }
+  .highlight-box.blinq .box-label { color: var(--stage); }
+  .highlight-box p { font-size: 13.5px; color: var(--text-muted); margin: 0; line-height: 1.7; }
+  .highlight-box p + p { margin-top: 0.6rem; }
+
+  .panel-rows {
+    display: flex; flex-direction: column; gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0;
+  }
+  .panel-row { display: grid; grid-template-columns: 190px 1fr; background: var(--surface); }
+  .panel-label { padding: 1rem 1.25rem; background: var(--surface-alt); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; }
+  .panel-label strong { font-family: var(--mono); font-size: 13px; color: var(--text); display: block; margin-bottom: 2px; }
+  .panel-label span { font-size: 11px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.02em; }
+  .panel-body { padding: 1rem 1.25rem; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+  .panel-body code {
+    display: block; font-family: var(--mono); font-size: 12px; color: var(--stage); background: #010409;
+    padding: 0.6rem 0.75rem; border-radius: 4px; margin-bottom: 0.6rem; overflow-x: auto; white-space: pre;
+  }
+
+  .numbers-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 1.5rem 0;
+  }
+  .num-cell { background: var(--surface); padding: 1.25rem; text-align: center; }
+  .num-big { font-family: var(--mono); font-size: 2rem; font-weight: 600; display: block; line-height: 1; margin-bottom: 6px; }
+  .num-cell:nth-child(1) .num-big { color: var(--accent); }
+  .num-cell:nth-child(2) .num-big { color: var(--stage); }
+  .num-cell:nth-child(3) .num-big { color: var(--dev); }
+  .num-label { font-size: 12px; color: var(--text-muted); }
+
+  .qa-section { margin-bottom: 4rem; scroll-margin-top: 2rem; }
+  .qa-section h2 { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+  .qa-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; display: block; }
+  .qa-intro { font-size: 14px; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.7; }
+  .qa-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+  .qa-question {
+    width: 100%; background: var(--surface); border: none; padding: 1rem 1.25rem; text-align: left; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; color: var(--text);
+    font-size: 14px; font-family: var(--sans); font-weight: 500; line-height: 1.5; transition: background 0.15s;
+  }
+  .qa-question:hover { background: var(--surface-alt); }
+  .qa-question:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .qa-q-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; flex-shrink: 0; padding: 2px 8px; border-radius: 20px; }
+  .qa-item.concept .qa-q-tag  { background: rgba(88,166,255,0.12);  color: var(--accent); border: 1px solid rgba(88,166,255,0.2); }
+  .qa-item.scenario .qa-q-tag { background: rgba(45,212,191,0.10);  color: var(--stage);  border: 1px solid rgba(45,212,191,0.2); }
+  .qa-item.tradeoff .qa-q-tag { background: rgba(230,168,23,0.12);  color: var(--dev);    border: 1px solid rgba(230,168,23,0.2); }
+  .qa-chevron { font-size: 12px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+  .qa-answer { display: none; padding: 0 1.25rem 1.25rem; background: var(--surface); border-top: 1px solid var(--border); }
+  .qa-item.open .qa-answer { display: block; }
+  .qa-item.open .qa-chevron { transform: rotate(180deg); }
+  .qa-answer p { font-size: 14px; color: var(--text-muted); line-height: 1.75; margin-top: 1rem; margin-bottom: 0.75rem; }
+  .qa-answer p:last-child { margin-bottom: 0; }
+  .qa-answer strong { color: var(--text); }
+  .qa-answer .answer-note {
+    font-family: var(--mono); font-size: 12px; background: rgba(88,166,255,0.07); border-left: 2px solid var(--accent);
+    padding: 0.6rem 0.85rem; border-radius: 0 4px 4px 0; margin-top: 0.75rem; color: var(--text-muted); line-height: 1.6;
+  }
+  .qa-answer ul { list-style: none; display: flex; flex-direction: column; gap: 5px; margin: 0.75rem 0; }
+  .qa-answer ul li { font-size: 14px; color: var(--text-muted); padding-left: 1.25rem; position: relative; line-height: 1.65; }
+  .qa-answer ul li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 12px; top: 1px; }
+
+  .step-list { display: flex; flex-direction: column; gap: 4px; margin: 1.5rem 0; }
+  .step { display: flex; align-items: baseline; gap: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.85rem 1.1rem; }
+  .step-n { font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; width: 24px; }
+  .step-content strong { font-size: 14px; color: var(--text); display: block; margin-bottom: 2px; }
+  .step-content span { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  hr.sep { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  code { font-family: var(--mono); font-size: 0.9em; background: rgba(110,118,129,0.15); padding: 1px 5px; border-radius: 4px; }
+
+  @media (max-width: 800px) {
+    .shell { grid-template-columns: 1fr; }
+    nav { display: none; }
+    main { padding: 2rem 1.5rem; }
+    .numbers-row { grid-template-columns: 1fr; }
+    .compare { grid-template-columns: 1fr; }
+    .panel-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <nav aria-label="Page navigation">
+    <div class="nav-brand">
+      <strong>GPU Inference FinOps</strong>
+      Personal Project Deep Dive
+    </div>
+    <div class="pipeline-track">
+      <div class="pipeline-line" aria-hidden="true"></div>
+      <div class="packet" aria-hidden="true"></div>
+
+      <a href="#overview" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Overview<span>Why this exists</span></span>
+      </a>
+      <a href="#architecture" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Architecture<span>GKE, Terraform, vLLM</span></span>
+      </a>
+      <a href="#sharing-mechanic" class="nav-item dev">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Sharing Mechanic<span>Time-slicing vs MIG</span></span>
+      </a>
+      <a href="#quota-gauntlet" class="nav-item dev">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Quota Gauntlet<span>3 GCP quota gates</span></span>
+      </a>
+      <a href="#dashboard" class="nav-item stg">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Dashboard<span>DCGM + vLLM metrics</span></span>
+      </a>
+      <a href="#debugging" class="nav-item dev">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">War Stories<span>Real gotchas fixed</span></span>
+      </a>
+      <a href="#roadmap" class="nav-item prd">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Prod Roadmap<span>What I'd add next</span></span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a href="#qa" class="nav-item ref">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span class="nav-label">Mock Q&amp;A<span>Practice questions</span></span>
+      </a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero">
+      <p class="hero-eyebrow">Personal Project · GKE · vLLM · NVIDIA Time-Sharing</p>
+      <h1>FinOps for<br>GPU inference<span class="hero-cursor" aria-hidden="true"></span></h1>
+      <p class="hero-sub">
+        GPU capacity is the most expensive, most commonly wasted resource in AI infrastructure — by default, Kubernetes hands one pod an entire physical GPU exclusively, even if that workload uses a fraction of it. I built a GKE-based inference platform that shares one physical T4 across multiple model replicas using NVIDIA time-slicing, applying the same cost-attribution instincts that cut a production AWS bill 50% to GPU waste instead of cloud spend.
+      </p>
+      <div class="hero-tags">
+        <span class="tag tag-ref">GKE</span>
+        <span class="tag tag-dev">Terraform</span>
+        <span class="tag tag-stage">vLLM</span>
+        <span class="tag tag-prod">NVIDIA Time-Slicing</span>
+        <span class="tag tag-ref">Prometheus · Grafana · DCGM</span>
+      </div>
+    </header>
+
+    <!-- 01 OVERVIEW -->
+    <section class="section" id="overview">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Overview — why this exists</h2>
+      </div>
+      <div class="section-body">
+        <p>Most "I deployed an LLM" portfolio projects stop the moment inference works. This one goes a layer deeper: it applies FinOps discipline to the GPU layer specifically — the resource type most commonly over-provisioned in AI workloads, because by default a Kubernetes pod claims an entire physical GPU exclusively regardless of how much of it the workload actually uses. It also patches a real resume gap (GPU/MLOps exposure) by reusing skills already proven in production — Terraform, Kubernetes autoscaling, Prometheus/Grafana — pointed at a new target.</p>
+
+        <div class="numbers-row">
+          <div class="num-cell">
+            <span class="num-big">3</span>
+            <span class="num-label">independent GCP quota dimensions that had to clear before a single GPU node could launch</span>
+          </div>
+          <div class="num-cell">
+            <span class="num-big">2</span>
+            <span class="num-label">model replicas sharing one physical T4 GPU via time-slicing, memory-budgeted deliberately</span>
+          </div>
+          <div class="num-cell">
+            <span class="num-big">6+</span>
+            <span class="num-label">real infra gotchas hit and fixed while building it — see War Stories</span>
+          </div>
+        </div>
+
+        <p><strong>One-liner:</strong> a GKE inference platform that shares one physical GPU across multiple LLM replicas via NVIDIA time-slicing, autoscales the GPU node pool to zero when idle, and instruments GPU utilization/cost through DCGM + Prometheus + Grafana — the same cost-attribution pattern used for cloud spend, applied to GPU-hours instead.</p>
+
+        <div class="highlight-box info">
+          <p class="box-label">Honest project status</p>
+          <p>This is a live build, not a polished retrospective. The GKE cluster, GPU node pool, and time-sharing config (Phases 0–2) are live and verified via Terraform. The vLLM/GPU serving layer (Phase 3) is fully built but blocked on a GCP GPU quota approval delay — see the Quota Gauntlet section below, itself real first-hand material for "tell me about a time infrastructure didn't cooperate."</p>
+          <p>With RunPod and GCP support both dead-ending on a fixed deadline, the pipeline was proven end-to-end a different way instead: a CPU fallback pool (zero GPU quota needed) running Ollama in place of vLLM, verified with a real inference request returning a real 200 response. The GPU architecture stays exactly as designed and documented, ready to take over the moment quota clears — nothing here is simulated or faked to look finished.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- 02 ARCHITECTURE -->
+    <section class="section" id="architecture">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Architecture</h2>
+      </div>
+      <div class="section-body">
+        <p>Everything is provisioned via Terraform against GCP; end-to-end flow from IaC to a served request:</p>
+
+        <div class="flow">
+          <div class="flow-node ci-node">Terraform</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node">GKE cluster (zonal)</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node dev-node">system-pool (e2-medium, fixed)</div>
+          <span class="flow-arrow">+</span>
+          <div class="flow-node dev-node">gpu-pool (T4, Spot, 0→1 autoscale)</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node stage-node">vLLM + Qwen2.5-3B ×2</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node prod-node">DCGM + Prometheus + Grafana</div>
+        </div>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>GKE cluster (zonal)</h4>
+            <p>Single-zone (<code>us-central1-a</code>) rather than regional — qualifies for GCP's one-free-zonal-cluster-per-billing-account fee waiver, so the control plane itself costs nothing.</p>
+          </div>
+          <div class="concept-card">
+            <h4>system-pool</h4>
+            <p>Fixed 1-node, non-GPU <code>e2-medium</code> pool for background workloads (CoreDNS, later Prometheus/Grafana) so they never compete for GPU capacity.</p>
+          </div>
+          <div class="concept-card">
+            <h4>gpu-pool</h4>
+            <p><code>n1-standard-4</code> + 1× NVIDIA T4, Spot pricing, autoscaling 0→1 node, tainted so only GPU-tolerating pods can land there, with GKE-native time-sharing configured directly on the node pool.</p>
+          </div>
+          <div class="concept-card">
+            <h4>vLLM</h4>
+            <p>OpenAI-compatible inference server; two replicas of Qwen2.5-3B-Instruct, each capped to 40% GPU memory utilization, sharing the one physical GPU via time-slicing.</p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-block-header"><span class="lang-badge">hcl</span>terraform/main.tf — gpu_pool node config</div>
+          <pre><span class="km">resource</span> <span class="kv">"google_container_node_pool"</span> <span class="kv">"gpu_pool"</span> {
+  <span class="ky">autoscaling</span> {
+    <span class="ky">min_node_count</span> = <span class="kv">0</span>
+    <span class="ky">max_node_count</span> = <span class="kv">1</span>
+  }
+  <span class="ky">node_config</span> {
+    <span class="ky">machine_type</span> = <span class="kv">"n1-standard-4"</span>
+    <span class="ky">spot</span>         = <span class="kv">true</span>
+    <span class="ky">guest_accelerator</span> {
+      <span class="ky">type</span>  = <span class="kv">"nvidia-tesla-t4"</span>
+      <span class="ky">count</span> = <span class="kv">1</span>
+      <span class="ky">gpu_sharing_config</span> {
+        <span class="ky">gpu_sharing_strategy</span>       = <span class="kv">"TIME_SHARING"</span>
+        <span class="ky">max_shared_clients_per_gpu</span> = <span class="kv">4</span>
+      }
+    }
+    <span class="ky">taint</span> {
+      <span class="ky">key</span> = <span class="kv">"nvidia.com/gpu"</span>, <span class="ky">value</span> = <span class="kv">"present"</span>, <span class="ky">effect</span> = <span class="kv">"NO_SCHEDULE"</span>
+    }
+  }
+}</pre>
+        </div>
+
+        <div class="highlight-box info">
+          <p class="box-label">Design choice — static autoscaling pool, not Node Auto-Provisioning</p>
+          <p>GKE's closer analog to AWS Karpenter is Node Auto-Provisioning (NAP), which creates entirely new node pool shapes on demand rather than scaling a pre-defined pool. I used a standard node pool with Cluster Autoscaler instead — simpler to reason about and debug on a quota-constrained project, and it still achieves the core story (GPU nodes scale to zero when idle). NAP is a noted stretch goal, not a gap in understanding.</p>
+        </div>
+
+        <div class="highlight-box warn">
+          <p class="box-label">Design choice — least-privilege node identity</p>
+          <p>Nodes run as a dedicated service account with exactly 4 IAM roles (log writer, metric writer, monitoring viewer, artifact registry reader) instead of GCP's broad default Compute Engine service account — the node can do what the workload needs and nothing else.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- 03 SHARING MECHANIC -->
+    <section class="section" id="sharing-mechanic">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>The GPU sharing mechanic</h2>
+      </div>
+      <div class="section-body">
+        <p>Kubernetes normally treats a physical GPU as an indivisible unit — one pod claims the whole card exclusively, even using 10% of it. GKE supports two native sharing strategies to fix that:</p>
+
+        <div class="compare">
+          <div class="compare-col push">
+            <h4>TIME_SHARING (used here)</h4>
+            <ul>
+              <li>Software-level round-robin scheduling between pods</li>
+              <li>Works on any NVIDIA GPU type</li>
+              <li>No memory isolation between sharing pods</li>
+              <li>Configured directly as a node pool setting via Terraform</li>
+            </ul>
+          </div>
+          <div class="compare-col pull">
+            <h4>MIG (Multi-Instance GPU)</h4>
+            <ul>
+              <li>Hardware-level partitioning — true isolated mini-GPUs</li>
+              <li>Only available on A100 / H100 cards</li>
+              <li>Dedicated memory and compute per instance</li>
+              <li>Too expensive for this project's budget</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="highlight-box warn">
+          <p class="box-label">The nuance almost everyone misses</p>
+          <p>Time-slicing shares GPU <strong>compute scheduling</strong>, not GPU <strong>memory</strong> — every sharing pod still draws from the same physical 16GB pool (only MIG actually partitions memory). So the real ceiling on concurrent replicas isn't the <code>max_shared_clients_per_gpu</code> setting (4, here) — it's how many replicas' memory reservations actually fit in 16GB. A 3B model needs roughly 6GB just for weights, so 4 replicas would try to reserve 24GB and OOM. Sized to <strong>2 replicas</strong> at <code>--gpu-memory-utilization=0.4</code> each instead — an honest number, not the scheduling ceiling maxed out for show.</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-block-header"><span class="lang-badge">yaml</span>k8s/vllm-deployment.yaml — resource shape</div>
+          <pre><span class="ky">resources</span><span class="kv">:</span>
+  <span class="ky">limits</span><span class="kv">:</span>
+    <span class="ky">nvidia.com/gpu</span><span class="kv">: 1</span>   <span class="kc"># scheduler places both replicas on the one sliced GPU node</span>
+<span class="ky">args</span><span class="kv">:</span>
+  <span class="kc">- --model=Qwen/Qwen2.5-3B-Instruct</span>
+  <span class="kc">- --gpu-memory-utilization=0.4</span>  <span class="kc"># 2 replicas × 0.4 ≈ 0.8, headroom for KV cache</span>
+  <span class="kc">- --max-model-len=4096</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- 04 QUOTA GAUNTLET -->
+    <section class="section" id="quota-gauntlet">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>The quota gauntlet</h2>
+      </div>
+      <div class="section-body">
+        <p>Getting a single Spot GPU VM to actually launch on a new GCP billing account meant clearing three <em>independent</em> quota dimensions — each failure surfaced as the same generic pod-level error, and the real reason only showed up one layer deeper, in the Cluster Autoscaler's own status:</p>
+
+        <div class="step-list">
+          <div class="step">
+            <span class="step-n">1</span>
+            <div class="step-content">
+              <strong>Free-trial accounts can't request GPU quota at all</strong>
+              <span>A hard policy restriction, not a UI gap. Fixed by "activating" the billing account to a standard paid account (free credit stays intact).</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">2</span>
+            <div class="step-content">
+              <strong><code>PREEMPTIBLE_CPUS</code> regional quota — limit 0</strong>
+              <span>The vCPU quota specifically for Spot/Preemptible instances, entirely separate from GPU quota. The Spot node needs 4 vCPUs for the instance itself, regardless of the GPU attached. Requested increase to 8 — approved instantly.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">3</span>
+            <div class="step-content">
+              <strong><code>GPUS_ALL_REGIONS</code> — a global, project-wide GPU cap — limit 0</strong>
+              <span>Separate again from the per-type regional quota (<code>PREEMPTIBLE_NVIDIA_T4_GPUS</code>, already fine at 1). Requested increase to 2 — <strong>auto-rejected</strong>: "unable to grant additional quota... new project... wait 48h... or contact Sales." A known automated fraud-prevention heuristic on low-history billing accounts.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight-box info">
+          <p class="box-label">How the real error was actually found</p>
+          <p>The pod event just said <code>0/1 nodes are available: Insufficient nvidia.com/gpu</code> — generic, unhelpful. The precise root cause only surfaced by checking <code>kubectl get configmap cluster-autoscaler-status -n kube-system -o yaml</code>, which carries the Cluster Autoscaler's actual backoff reason per node group, including the exact quota metric name and limit. Worth knowing as a debugging habit: when a scale-up silently fails on GKE, the pod event is not the source of truth.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- 05 DASHBOARD -->
+    <section class="section" id="dashboard">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Dashboard — planned panels &amp; metrics</h2>
+      </div>
+      <div class="section-body">
+        <div class="highlight-box warn">
+          <p class="box-label">Status: designed, not yet live</p>
+          <p>Blocked behind the quota gauntlet above — these panels get built the moment a real GPU node exists to scrape metrics from. Listed here as the designed target, not a verified result.</p>
+        </div>
+
+        <div class="panel-rows">
+          <div class="panel-row">
+            <div class="panel-label"><strong>GPU Utilization</strong><span>time series</span></div>
+            <div class="panel-body"><code>avg(DCGM_FI_DEV_GPU_UTIL) by (gpu)</code>Per-GPU compute utilization from the DCGM exporter — the core "are we wasting the card" signal.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>GPU Memory Used</strong><span>time series</span></div>
+            <div class="panel-body"><code>DCGM_FI_DEV_FB_USED / DCGM_FI_DEV_FB_TOTAL</code>Fraction of the 16GB pool in use — validates the 2-replica sizing decision empirically.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Node Count (GPU pool)</strong><span>stat</span></div>
+            <div class="panel-body"><code>kube_node_labels{label_workload="gpu-inference"}</code>Watches the scale-to-zero behavior directly — 0 when idle, 1 under load.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>vLLM Request Rate</strong><span>time series</span></div>
+            <div class="panel-body"><code>rate(vllm:request_success_total[5m])</code>Requests/sec per replica, from vLLM's own Prometheus metrics.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>Time-to-First-Token</strong><span>time series</span></div>
+            <div class="panel-body"><code>histogram_quantile(0.95, rate(vllm:time_to_first_token_seconds_bucket[5m]))</code>p95 latency to first generated token — the user-perceived responsiveness metric.</div>
+          </div>
+          <div class="panel-row">
+            <div class="panel-label"><strong>$/hour, sharing vs. dedicated</strong><span>stat comparison</span></div>
+            <div class="panel-body"><code>Spot GPU-hour cost ÷ replicas served</code>The headline FinOps number: cost per served replica with 2-way time-sliced sharing vs. one dedicated GPU per replica.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- 06 WAR STORIES -->
+    <section class="section" id="debugging">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>Debugging war stories</h2>
+      </div>
+      <div class="section-body">
+        <p>Real issues hit while building this, in order — genuine STAR-story material, not hypotheticals. (The quota gauntlet above is really war story #1, told separately since it deserves the room.)</p>
+
+        <div class="step-list">
+          <div class="step">
+            <span class="step-n">1</span>
+            <div class="step-content">
+              <strong>Terraform couldn't authenticate at all</strong>
+              <span><code>gcloud auth login</code> authenticates the CLI; Terraform (and most SDKs) need a separate credential store — Application Default Credentials, set up via <code>gcloud auth application-default login</code>. Two different auth layers for the same account.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">2</span>
+            <div class="step-content">
+              <strong>APIs must be explicitly enabled per project before use</strong>
+              <span>Hit twice — Compute Engine API (before GPU quota rows even appear in the console) and Kubernetes Engine API (blocked the first <code>terraform apply</code> with a 403 <code>SERVICE_DISABLED</code>). Fixed both with <code>gcloud services enable</code>.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">3</span>
+            <div class="step-content">
+              <strong><code>kubectl</code> couldn't reach the cluster after <code>get-credentials</code></strong>
+              <span>Needed a separate <code>gke-gcloud-auth-plugin</code> binary. Even after installing it via <code>gcloud components install</code>, its directory wasn't on <code>PATH</code> — fixed with a symlink into the same directory <code>gcloud</code> itself already resolves from.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">4</span>
+            <div class="step-content">
+              <strong>Changing GPU sharing config forced a node pool replacement</strong>
+              <span><code>gpu_sharing_config</code> can't be updated on a live node pool — some cloud resource attributes are immutable post-creation, so Terraform's plan showed "must be replaced." Safe here since the pool had 0 nodes at the time; would have meant real disruption on a live pool.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">5</span>
+            <div class="step-content">
+              <strong>Original model choice (Llama-3.2-3B) was gated</strong>
+              <span>Meta's Llama models require Hugging Face license acceptance and an auth token just to download weights — pure friction with no payoff for a demo. Swapped to Qwen2.5-3B-Instruct, same size class, fully open.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">6</span>
+            <div class="step-content">
+              <strong>Assumed manual NVIDIA device plugin install — GKE does it natively</strong>
+              <span>On self-managed Kubernetes (EKS) you hand-install the device plugin DaemonSet and a time-slicing ConfigMap. GKE auto-installs the driver + device plugin the moment a node pool has a GPU attached, and time-sharing is a first-class Terraform node pool setting — simpler than the generic approach, worth knowing the platform difference explicitly.</span>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-n">7</span>
+            <div class="step-content">
+              <strong>GPU quota permanently blocked against a fixed deadline — pivoted instead of waiting</strong>
+              <span>With the global quota request rejected, a self-serve GPU rental (RunPod) blocked on requiring a credit card, and GCP's support chat gated behind a business-domain field that didn't fit, continuing to wait on any of the three wasn't an option. Added a second, GPU-free node pool and swapped vLLM for Ollama (CPU-friendly, official image) purely to prove the surrounding platform — Terraform, GKE, autoscaling, Deployment/Service — end-to-end, while leaving the GPU-specific design fully intact and ready to take over the moment quota clears.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- 07 ROADMAP -->
+    <section class="section" id="roadmap">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2>How I'd productionize this</h2>
+      </div>
+      <div class="section-body">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Node Auto-Provisioning</h4>
+            <p>Swap the static autoscaling pool for GKE NAP (or Karpenter on AWS) to provision node shapes dynamically instead of scaling a pre-defined pool.</p>
+          </div>
+          <div class="concept-card">
+            <h4>MIG for real isolation</h4>
+            <p>On A100/H100 hardware, use MIG instead of time-slicing where workloads need guaranteed memory isolation from noisy neighbors.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Multi-tenant chargeback</h4>
+            <p>Label pods by team/model and roll GPU-hour cost up per label, the same cost-attribution pattern used for cloud spend tagging.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Idle-GPU alerting</h4>
+            <p>Alertmanager rule on sustained low <code>DCGM_FI_DEV_GPU_UTIL</code> — the GPU equivalent of flagging an idle EC2 instance.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Multi-cloud portability</h4>
+            <p>Hitting GCP's new-account quota wall (see Quota Gauntlet) was a real lesson in not hard-depending on one cloud's provisioning timeline when a deadline is fixed — evaluated a self-serve GPU rental (RunPod) as a fallback path.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MOCK Q&A -->
+    <section class="qa-section" id="qa">
+      <span class="qa-eyebrow">Practice</span>
+      <h2>Mock Interview Q&amp;A</h2>
+      <p class="qa-intro">Click to reveal a strong answer — read it once, then close it and try to say it in your own words.</p>
+
+      <div class="qa-item concept">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Walk me through this project — what problem does it solve?</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>GPU capacity is the most expensive, most commonly over-provisioned resource in AI infrastructure — Kubernetes hands one pod an entire physical GPU by default, even if it only uses a fraction of it. This project shares one physical T4 GPU across multiple LLM replicas using NVIDIA time-slicing on GKE, autoscales the GPU node pool to zero when idle, and measures the cost/utilization difference against one-GPU-per-replica — the same cost-attribution instinct I used to cut a production AWS bill 50%, applied to GPU-hours.</p>
+        </div>
+      </div>
+
+      <div class="qa-item concept">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What's the difference between training and inference, and why does that matter here?</span>
+          <span class="qa-q-tag">concept</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Training adjusts a model's weights via backpropagation over large datasets — extremely compute-intensive, usually multi-GPU/multi-node. Inference just runs an already-trained model to generate outputs — much lighter, can run on a single GPU. This project is 100% inference; no training happens anywhere in it, which is exactly why a single Spot T4 is enough hardware.</p>
+        </div>
+      </div>
+
+      <div class="qa-item scenario">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>How does GPU time-slicing actually work, and what's its biggest limitation?</span>
+          <span class="qa-q-tag">scenario</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>It's a software-level scheduling mechanism, configured through the GPU's device plugin, that lets multiple pods take turns running on one physical GPU — similar to CPU time-sharing. The limitation: it shares compute scheduling, not memory. All sharing pods still draw from the same physical memory pool, so you have to size each workload's memory reservation so N replicas actually fit — the scheduling ceiling you configure isn't automatically the real ceiling.</p>
+          <div class="answer-note">Follow-up they might ask: "How is that different from MIG?" → MIG partitions the hardware itself into isolated instances with dedicated memory, but only on A100/H100 cards — time-slicing works on any NVIDIA GPU but gives no isolation.</div>
+        </div>
+      </div>
+
+      <div class="qa-item scenario">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What was the hardest part of building this?</span>
+          <span class="qa-q-tag">scenario</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Getting a single GPU VM to actually launch on a new GCP billing account. It required clearing three independent quota dimensions — a regional per-GPU-type quota, a regional Spot-CPU quota, and a global all-regions GPU cap — and each failure surfaced through the exact same generic pod-scheduling error. The real reason only appeared by checking the Cluster Autoscaler's own status configmap, not the pod event. The global quota request was ultimately auto-rejected as a new-account fraud-prevention measure, forcing a real-time decision about fallback infrastructure under a hard deadline.</p>
+        </div>
+      </div>
+
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Why GKE Node Auto-Provisioning wasn't used, when it's the closer equivalent to Karpenter?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>I used a standard node pool with Cluster Autoscaler (0→1 nodes) instead of NAP. NAP creates entirely new node pool shapes on demand rather than scaling a pre-defined pool — closer to Karpenter's model — but adds real configuration complexity around cluster-wide resource limits and autoprovisioning defaults. On a quota-constrained project, I chose the simpler, more debuggable option that still delivers the core story: GPU nodes scale to zero when idle. NAP is a noted next step, not a knowledge gap.</p>
+        </div>
+      </div>
+
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>Why GCP over AWS for this project?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>No AWS credits remaining, and GCP's free trial covered the GPU cost — but free-trial accounts are blocked from requesting GPU quota by policy, so I had to activate a full billing account first, which kept the credit but removed the restriction. Worth noting this isn't GCP-specific: AWS gates GPU instance families behind similar Service Quota approval for new accounts too — the friction is standard fraud-prevention across major clouds, not a GCP weakness.</p>
+        </div>
+      </div>
+
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>What does it mean when Terraform says a change "forces replacement"?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>Some resource attributes can't be updated on a live resource because the cloud provider's API doesn't support an in-place update for that field — Terraform's only option is to destroy and recreate it. The plan output flags this explicitly so you can catch it before applying; it matters most when the resource has live traffic, since a forced replacement there means real disruption, not just a config tweak. I hit this changing GPU time-sharing config — safe in this case since the pool had zero nodes at the time.</p>
+        </div>
+      </div>
+
+      <div class="qa-item tradeoff">
+        <button class="qa-question" onclick="toggle(this)" aria-expanded="false">
+          <span>How would you productionize this?</span>
+          <span class="qa-q-tag">tradeoff</span>
+          <span class="qa-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="qa-answer" hidden>
+          <p>In rough priority order: move to Node Auto-Provisioning for dynamic node shapes, use MIG instead of time-slicing on hardware that needs true memory isolation, add per-team/per-model chargeback using pod labels, wire an Alertmanager rule on sustained low GPU utilization as the GPU equivalent of an idle-instance alert, and avoid hard-depending on a single cloud's GPU provisioning timeline when a project has a fixed deadline — evaluate a self-serve GPU rental provider as a fallback path from day one, not as a last-minute scramble.</p>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function toggle(btn) {
+    const item = btn.closest('.qa-item');
+    const answer = item.querySelector('.qa-answer');
+    const isOpen = item.classList.contains('open');
+    item.classList.toggle('open', !isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
+    answer.hidden = isOpen;
+  }
+</script>
+
+</body>
+</html>
